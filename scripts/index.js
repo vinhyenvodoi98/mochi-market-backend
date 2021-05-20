@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const axios = require('axios');
 const NFT = require('../models/NFT');
 const ERC721Token = require('../models/ERC721Token');
-const { getAcceptedNfts, initERC721 } = require('../helpers/blockchain');
+const User = require('../models/User');
+const { getAcceptedNfts, initERC721, getOwner } = require('../helpers/blockchain');
 
 require('dotenv').config();
 
@@ -48,11 +49,12 @@ const fetchErc721 = async () => {
               let req = await axios.get(tokenURI);
 
               let erc721 = new ERC721Token({
-                index: i,
+                tokenId: i,
                 tokenURI: tokenURI,
                 name: !!req.data.name ? req.data.name : 'Unnamed',
                 image: !!req.data.image ? req.data.image : '',
                 description: !!req.data.description ? req.data.description : '',
+                nft: recordedNFT.id,
               });
 
               // save ERC721
@@ -63,13 +65,25 @@ const fetchErc721 = async () => {
                 { _id: recordedNFT._id },
                 { $push: { tokens: recordedERC721._id } }
               );
+
+              // update owner
+              let ownerAddress = await getOwner(ERC721token.addressToken, i);
+              console.log({ ownerAddress });
+              // update owner
+
+              await User.findOneAndUpdate(
+                { address: ownerAddress },
+                { expire: new Date(), $push: { erc721tokens: recordedERC721._id } },
+                { upsert: true, new: true, setDefaultsOnInsert: true }
+              );
             } catch (error) {
               let erc721 = new ERC721Token({
-                index: i,
+                tokenId: i,
                 tokenURI: tokenURI,
                 name: 'Unnamed',
                 image: '',
                 description: 'error',
+                nft: recordedNFT.id,
               });
 
               // save ERC721
@@ -79,6 +93,15 @@ const fetchErc721 = async () => {
               await NFT.updateOne(
                 { _id: recordedNFT._id },
                 { $push: { tokens: recordedERC721._id } }
+              );
+
+              // update owner
+              let ownerAddress = await getOwner(ERC721token.addressToken, i);
+
+              await User.findOneAndUpdate(
+                { address: ownerAddress },
+                { expire: new Date(), $push: { erc721tokens: recordedERC721._id } },
+                { upsert: true, new: true, setDefaultsOnInsert: true }
               );
             }
           } else break;

@@ -27,8 +27,15 @@ const getNFTDetail = async (contractAddress, id) => {
   return req.data;
 };
 
+const getOwner = async (contractAddress, id) => {
+  const erc721Instances = new ethers.Contract(contractAddress, ERC721Artifacts.abi, provider);
+  const ownerAddress = await erc721Instances.ownerOf(id);
+  return ownerAddress;
+};
+
 module.exports = {
   getAcceptedNfts,
   initERC721,
   getNFTDetail,
+  getOwner,
 };

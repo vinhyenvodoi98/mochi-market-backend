@@ -3,6 +3,9 @@ const { Schema } = mongoose;
 
 const ERC1155TokenSchema = new Schema(
   {
+    tokenId: {
+      type: String,
+    },
     tokenURI: {
       type: String,
     },
@@ -18,6 +21,7 @@ const ERC1155TokenSchema = new Schema(
     amount: {
       type: Number,
     },
+    nft: { type: Schema.Types.ObjectId, refPath: 'NFT' },
   },
   {
     timestamps: true,

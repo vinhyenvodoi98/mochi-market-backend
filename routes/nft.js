@@ -2,17 +2,26 @@ const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
 const NFT = require('../models/NFT');
+const ERC721Token = require('../models/ERC721Token');
 
 router.get('/:address', async (req, res) => {
   try {
-    const address = req.params.address;
-    const tokens = await NFT.find({ address: address });
-    let result = [];
+    const { address } = req.params;
+    const skip = parseInt(req.query.skip);
+    const limit = parseInt(req.query.limit);
 
-    for (let i = 0; i < tokens.length; i++) {
-      result = result.concat(tokens[i].tokens);
-    }
-    return res.json({ tokens: result });
+    let tokens = await NFT.find({ address }, 'tags name symbol address onModel', {
+      skip,
+      limit,
+    }).populate({
+      path: 'tokens',
+      model: ERC721Token,
+      select: ['tokenId', 'tokenURI', 'name', 'image', 'description'],
+    });
+
+    tokens = tokens.filter((token) => token.tokens.length > 0);
+
+    return res.json({ tokens });
   } catch (err) {
     return res.status(500).end();
   }

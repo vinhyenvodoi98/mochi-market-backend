@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const ERC721TokenSchema = new Schema(
   {
-    index: {
+    tokenId: {
       type: Number,
       required: true,
     },
@@ -19,6 +19,7 @@ const ERC721TokenSchema = new Schema(
     description: {
       type: String,
     },
+    nft: { type: Schema.Types.ObjectId, refPath: 'NFT' },
   },
   {
     timestamps: true,
