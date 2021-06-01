@@ -44,7 +44,8 @@ const fetchErc721 = async () => {
         for (let i = 1; i < 999999; i++) {
           let tokenURI = await instance.tokenURI(i);
           if (tokenURI) {
-            console.log({ tokenURI });
+            let cid = tokenURI.split('/');
+            tokenURI = 'https://storage.mochi.market/ipfs/' + cid[cid.length - 1];
             try {
               let req = await axios.get(tokenURI);
 
