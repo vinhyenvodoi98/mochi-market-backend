@@ -3,7 +3,10 @@ const axios = require('axios');
 const NFT = require('../models/NFT');
 const ERC721Token = require('../models/ERC721Token');
 const User = require('../models/User');
+const SellOrder = require('../models/SellOrder');
+
 const { getAcceptedNfts, initERC721, getOwner } = require('../helpers/blockchain');
+const { getSellOrderListInstance } = require('../utils/getContractInstance');
 
 require('dotenv').config();
 
@@ -124,10 +127,49 @@ const fetchErc721 = async () => {
   }
 };
 
+const fetchSellOrder = async () => {
+  const sellOrderList = getSellOrderListInstance();
+  let availableSellOrderIdList = await sellOrderList.getAvailableSellOrdersIdList();
+  let availableSellOrders = await sellOrderList.getSellOrdersByIdList(
+    availableSellOrderIdList.resultERC721
+  );
+
+  const saveSellOrderList = (availableSellOrder) => {
+    return new Promise(async (resolve) => {
+      let nft = await NFT.findOne({ address: availableSellOrder.nftAddress });
+
+      let sellOrder = new SellOrder({
+        sellId: availableSellOrder.sellId.toString(),
+        nftAddress: nft._id,
+        tokenId: parseInt(availableSellOrder.tokenId.toString()),
+        amount: availableSellOrder.amount.toString(),
+        soldAmount: availableSellOrder.soldAmount.toString(),
+        seller: availableSellOrder.seller,
+        price: availableSellOrder.price.toString(),
+        token: availableSellOrder.token,
+        isActive: availableSellOrder.isActive,
+        sellTime: availableSellOrder.sellTime.toString(),
+        buyers: availableSellOrder.buyers,
+        buyTimes: availableSellOrder.buyTimes,
+      });
+      console.log('sellOrderId: ' + sellOrder.sellId);
+      let sellOrderId = await sellOrder.save();
+      resolve(sellOrderId);
+    });
+  };
+
+  await Promise.all(
+    availableSellOrders.map(async (availableSellOrder) => {
+      return await saveSellOrderList(availableSellOrder);
+    })
+  );
+};
+
 const main = async () => {
   var myArgs = process.argv.slice(2);
   if (myArgs[0] === 'erc721') await fetchErc721();
   // else if(myArgs[0]==='erc1155') ...
+  else if (myArgs[0] === 'sellOrder') await fetchSellOrder();
   process.exit(1);
 };
 
