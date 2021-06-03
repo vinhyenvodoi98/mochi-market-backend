@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { check, validationResult } = require('express-validator');
-const User = require('../models/User');
 const SellOrder = require('../models/SellOrder');
 const ERC721Token = require('../models/ERC721Token');
 const NFT = require('../models/NFT');

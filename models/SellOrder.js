@@ -14,11 +14,11 @@ const SellOrderSchema = new Schema(
     },
     amount: {
       type: String,
-      required: true,
+      default: '1',
     },
     soldAmount: {
       type: String,
-      required: true,
+      default: '0',
     },
     seller: {
       type: String,
@@ -38,7 +38,6 @@ const SellOrderSchema = new Schema(
     },
     sellTime: {
       type: String,
-      required: true,
     },
     buyers: [],
     buyTimes: [],

@@ -8,6 +8,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const { EventStream } = require('./helpers/listenEvent');
+
 const app = express();
 
 require('dotenv').config();
@@ -37,6 +39,8 @@ async function main() {
       }
     },
   };
+
+  EventStream();
 
   // app.use(cors());
   app.use(helmet());
