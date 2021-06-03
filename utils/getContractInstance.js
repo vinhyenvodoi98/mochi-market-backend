@@ -11,7 +11,7 @@ const vaultArtifacts = require('../contracts/Vault.json');
 const creativeStudioArtifacts = require('../contracts/CreativeStudio.json');
 const nftCampaignArtifacts = require('../contracts/NFTCampaign.json');
 const addressProviderArtifacts = require('../contracts/AddressesProvider.json');
-const mochiArtifacts = require('../contracts/Mochi.json');
+const MochiERC721NFT = require('../contracts/MochiERC721NFT.json');
 
 let contractAddress = getContractAddress(process.env.CHAIN_ID);
 
@@ -36,5 +36,5 @@ exports.getNftCampaignInstance = () =>
 exports.getAddressProviderInstance = () =>
   new ethers.Contract(contractAddress.AddressesProvider, addressProviderArtifacts.abi, provider);
 
-exports.getMochiInstance = () =>
-  new ethers.Contract(contractAddress.Mochi, mochiArtifacts.abi, provider);
+exports.getMochiERC721Instance = () =>
+  new ethers.Contract(contractAddress.Mochi, MochiERC721NFT.abi, provider);

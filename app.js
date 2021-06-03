@@ -15,6 +15,7 @@ require('dotenv').config();
 async function main() {
   const nftRouter = require('./routes/nft');
   const userRouter = require('./routes/user');
+  const sellOrderRouter = require('./routes/sellOrder');
 
   mongoose.connect(
     process.env.MONGODB_URI,
@@ -47,6 +48,7 @@ async function main() {
 
   app.use('/nft', cors(corsOptions), nftRouter);
   app.use('/user', cors(corsOptions), userRouter);
+  app.use('/sellOrder', cors(corsOptions), sellOrderRouter);
 
   // catch 404 and forward to error handler
   app.use((req, res, next) => {
