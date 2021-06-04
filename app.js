@@ -21,7 +21,7 @@ async function main() {
 
   mongoose.connect(
     process.env.MONGODB_URI,
-    { useUnifiedTopology: true, useNewUrlParser: true },
+    { useUnifiedTopology: true, useNewUrlParser: true, useFindAndModify: false },
     (error) => {
       if (error) console.log(error);
     }

@@ -20,6 +20,10 @@ const initERC721 = async (nftList) => {
   return erc721Instances;
 };
 
+const initERC721Single = (nftAddress) => {
+  return new ethers.Contract(nftAddress, ERC721Artifacts.abi, provider);
+};
+
 const getNFTDetail = async (contractAddress, id) => {
   const erc721Instances = new ethers.Contract(contractAddress, ERC721Artifacts.abi, provider);
   const token = await erc721Instances.tokenURI(id);
@@ -36,6 +40,7 @@ const getOwner = async (contractAddress, id) => {
 module.exports = {
   getAcceptedNfts,
   initERC721,
+  initERC721Single,
   getNFTDetail,
   getOwner,
 };
