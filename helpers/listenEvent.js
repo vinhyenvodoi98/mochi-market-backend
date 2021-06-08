@@ -7,7 +7,12 @@ const { initERC721Single } = require('./blockchain');
 const { default: axios } = require('axios');
 const User = require('../models/User');
 
-const EventStream = async (fromBlock) => {
+const OldEventStream = async () => {
+  let nfts = await NFT.find({}, 'address');
+  nfts.forEach((nft) => openListenERC721Event(nft.address));
+};
+
+const EventStream = async () => {
   let nftListInstance = getNftListInstance();
 
   nftListInstance.on('NFTAccepted', (nftAddress) => {
@@ -28,7 +33,7 @@ const EventStream = async (fromBlock) => {
       console.log(nftAddress + ': is erc1155');
     } else {
       updateERC721FromAcceptedList(nftAddress);
-      openListenERC721Event(nftAddress, fromBlock);
+      openListenERC721Event(nftAddress);
     }
   });
 
@@ -64,8 +69,6 @@ const EventStream = async (fromBlock) => {
     };
     updateNft();
   });
-
-  provider.resetEventsBlock(!!fromBlock ? fromBlock : 0);
 };
 
 const updateERC721FromAcceptedList = async (nftAddress) => {
@@ -140,26 +143,26 @@ const updateERC721FromAcceptedList = async (nftAddress) => {
   }
 };
 
-const openListenERC721Event = (nftAddress, fromBlock) => {
+const openListenERC721Event = (nftAddress) => {
   const instance = initERC721Single(nftAddress);
 
   instance.on('Transfer', (from, to, tokenId) => {
     const saveERC721 = async () => {
-      let tokenURI = await instance.tokenURI(tokenId);
-      if (tokenURI) {
-        let cid = tokenURI.split('/');
-        tokenURI = 'https://storage.mochi.market/ipfs/' + cid[cid.length - 1];
-        try {
-          let req = await axios.get(tokenURI);
+      let recordedNFT = await NFT.findOne({ address: nftAddress }).populate({
+        path: 'tokens',
+        model: ERC721Token,
+        match: { tokenId },
+      });
 
-          let recordedNFT = await NFT.findOne({ address: nftAddress }).populate({
-            path: 'tokens',
-            model: ERC721Token,
-            match: { tokenId },
-          });
+      // save erc721 of database don't have
+      if (!recordedNFT.tokens[0]) {
+        let tokenURI = await instance.tokenURI(tokenId);
+        if (tokenURI) {
+          let cid = tokenURI.split('/');
+          tokenURI = 'https://storage.mochi.market/ipfs/' + cid[cid.length - 1];
+          try {
+            let req = await axios.get(tokenURI);
 
-          // save erc721 of database don't have
-          if (!recordedNFT.tokens[0]) {
             let erc721 = new ERC721Token({
               tokenId,
               tokenURI: tokenURI,
@@ -193,9 +196,9 @@ const openListenERC721Event = (nftAddress, fromBlock) => {
                 { upsert: true, new: true, setDefaultsOnInsert: true }
               );
             }
+          } catch (error) {
+            console.log({ error });
           }
-        } catch (error) {
-          console.log({ error });
         }
       }
     };
@@ -205,10 +208,9 @@ const openListenERC721Event = (nftAddress, fromBlock) => {
       saveERC721();
     }
   });
-
-  provider.resetEventsBlock(!!fromBlock ? fromBlock : 0);
 };
 
 module.exports = {
   EventStream: EventStream,
+  OldEventStream: OldEventStream,
 };
