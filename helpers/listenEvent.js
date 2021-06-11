@@ -43,15 +43,15 @@ const EventStream = async () => {
     const saveNft = async () => {
       let isSellExist = await SellOrder.findOne({ sellId: sellId.toString() });
       if (!isSellExist) {
-        let nft = await NFT.findOne({ address: nftAddress });
+        let nft = await NFT.findOne({ address: nftAddress.toLowerCase() });
         if (!!nft) {
           let sellOrder = new SellOrder({
             sellId: sellId.toString(),
             nftAddress: nft._id,
             tokenId: parseInt(tokenId.toString()),
-            seller,
+            seller: seller.toLowerCase(),
             price: price.toString(),
-            token,
+            token: token.toLowerCase(),
             isActive: true,
           });
 
@@ -64,11 +64,18 @@ const EventStream = async () => {
   });
 
   sellOrderInstance.on('SellOrderDeactive', (seller, sellId, nftAddress, tokenId, price, token) => {
-    const UpdateNft = async () => {
+    const updateNft = async () => {
       await SellOrder.findOneAndUpdate({ sellId: sellId.toString() }, { isActive: false });
     };
     updateNft();
   });
+
+  sellOrderInstance.on(
+    'SellOrderCompleted',
+    (seller, sellId, buyer, nftAddress, tokenId, price, amount, token) => {
+      console.log(seller, sellId, buyer, nftAddress, tokenId, price, amount, token);
+    }
+  );
 };
 
 const updateERC721FromAcceptedList = async (nftAddress, isUserCreate) => {
