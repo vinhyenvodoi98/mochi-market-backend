@@ -6,7 +6,8 @@ const ERC721Token = require('../models/ERC721Token');
 
 router.get('/:address', async (req, res) => {
   try {
-    const { address } = req.params;
+    var { address } = req.params;
+    address = address.toLowerCase();
     const skip = parseInt(req.query.skip);
     const limit = parseInt(req.query.limit);
 
@@ -29,7 +30,11 @@ router.get('/:address', async (req, res) => {
 
 router.post('/transfer', async (req, res) => {
   try {
-    const { contractAddress, from, to, tokenId } = req.body;
+    var { contractAddress, from, to, tokenId } = req.body;
+    contractAddress = contractAddress.toLowerCase();
+    from = from.toLowerCase();
+    to = to.toLowerCase();
+
     let token = {};
 
     let newDocFrom = await NFT.findOne(

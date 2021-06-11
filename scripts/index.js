@@ -32,12 +32,12 @@ const fetchErc721 = async () => {
           // Save ERC721 basic info
           ERC721token.name = await instance.name();
           ERC721token.symbol = await instance.symbol();
-          ERC721token.addressToken = instance.address;
+          ERC721token.addressToken = instance.address.toLowerCase();
 
           let nft = new NFT({
             name: ERC721token.name,
             symbol: ERC721token.symbol,
-            address: ERC721token.addressToken,
+            address: ERC721token.addressToken.toLowerCase(),
             onModel: 'ERC721Token',
           });
 
@@ -77,37 +77,12 @@ const fetchErc721 = async () => {
                 // update owner
 
                 await User.findOneAndUpdate(
-                  { address: ownerAddress },
+                  { address: ownerAddress.toLowerCase() },
                   { expire: new Date(), $push: { erc721tokens: recordedERC721._id } },
                   { upsert: true, new: true, setDefaultsOnInsert: true }
                 );
               } catch (error) {
-                let erc721 = new ERC721Token({
-                  tokenId: i,
-                  tokenURI: tokenURI,
-                  name: 'Unnamed',
-                  image: '',
-                  description: 'error',
-                  nft: recordedNFT.id,
-                });
-
-                // save ERC721
-                let recordedERC721 = await erc721.save();
-
-                // update NFT
-                await NFT.updateOne(
-                  { _id: recordedNFT._id },
-                  { $push: { tokens: recordedERC721._id } }
-                );
-
-                // update owner
-                let ownerAddress = await getOwner(ERC721token.addressToken, i);
-
-                await User.findOneAndUpdate(
-                  { address: ownerAddress },
-                  { expire: new Date(), $push: { erc721tokens: recordedERC721._id } },
-                  { upsert: true, new: true, setDefaultsOnInsert: true }
-                );
+                console.log(error);
               }
             } else break;
           }
@@ -140,7 +115,7 @@ const fetchSellOrder = async () => {
 
   const saveSellOrderList = (availableSellOrder) => {
     return new Promise(async (resolve) => {
-      let nft = await NFT.findOne({ address: availableSellOrder.nftAddress });
+      let nft = await NFT.findOne({ address: availableSellOrder.nftAddress.toLowerCase() });
 
       let sellOrder = new SellOrder({
         sellId: availableSellOrder.sellId.toString(),
@@ -148,9 +123,9 @@ const fetchSellOrder = async () => {
         tokenId: parseInt(availableSellOrder.tokenId.toString()),
         amount: availableSellOrder.amount.toString(),
         soldAmount: availableSellOrder.soldAmount.toString(),
-        seller: availableSellOrder.seller,
+        seller: availableSellOrder.seller.toLowerCase(),
         price: availableSellOrder.price.toString(),
-        token: availableSellOrder.token,
+        token: availableSellOrder.token.toLowerCase(),
         isActive: availableSellOrder.isActive,
         sellTime: availableSellOrder.sellTime.toString(),
         buyers: availableSellOrder.buyers,

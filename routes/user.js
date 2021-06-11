@@ -28,19 +28,20 @@ router.post('/checkin', async (req, res) => {
 });
 
 router.get('/:address/:erc', async (req, res) => {
-  const { address, erc } = req.params;
+  var { address, erc } = req.params;
   const skip = parseInt(req.query.skip);
   const limit = parseInt(req.query.limit);
-
+  address = address.toLowerCase();
   try {
     let user;
     if (erc === 'erc721') {
-      user = await User.findOne({ address }, 'address erc721tokens', {
-        skip,
-        limit,
-      }).populate({
+      user = await User.findOne({ address }, 'address erc721tokens').populate({
         path: 'erc721tokens',
         model: ERC721Token,
+        options: {
+          skip,
+          limit,
+        },
         select: ['tokenId', 'tokenURI', 'name', 'image', 'description', 'nft'],
         populate: {
           path: 'nft',
@@ -49,12 +50,13 @@ router.get('/:address/:erc', async (req, res) => {
         },
       });
     } else if (erc === 'erc1155') {
-      user = await User.findOne({ address }, 'address erc721tokens', {
-        skip,
-        limit,
-      }).populate({
+      user = await User.findOne({ address }, 'address erc721tokens').populate({
         path: 'erc1155tokens',
         model: ERC1155Token,
+        options: {
+          skip,
+          limit,
+        },
         select: ['tokenId', 'tokenURI', 'name', 'image', 'description', 'nft'],
         populate: {
           path: 'nft',
@@ -62,6 +64,96 @@ router.get('/:address/:erc', async (req, res) => {
           select: ['name', 'symbol', 'address'],
         },
       });
+    } else if (erc === 'all') {
+      let userToken = await User.findOne({ address }, 'erc721tokens erc1155tokens')
+        .populate({
+          path: 'erc721tokens',
+          model: ERC721Token,
+          options: {
+            skip,
+            limit,
+          },
+          select: ['tokenId', 'tokenURI'],
+          populate: {
+            path: 'nft',
+            model: NFT,
+            select: ['address'],
+          },
+        })
+        .populate({
+          path: 'erc1155tokens',
+          model: ERC1155Token,
+          options: {
+            skip,
+            limit,
+          },
+          select: ['tokenId'],
+          populate: {
+            path: 'nft',
+            model: NFT,
+            select: ['address'],
+          },
+        });
+
+      let erc721 = userToken.erc721tokens.map((token) => {
+        let sToken = {};
+        sToken.index = token.tokenId;
+        sToken.tokenURI = token.tokenURI;
+        sToken.addressToken = token.nft.address;
+        sToken.is1155 = false;
+        return sToken;
+      });
+
+      let erc1155 = userToken.erc1155tokens.map((token) => {
+        let sToken = {};
+        sToken.index = token.tokenId;
+        sToken.tokenURI = token.tokenURI;
+        sToken.addressToken = token.nft.address;
+        sToken.is1155 = true;
+        return sToken;
+      });
+
+      user = erc721.concat(erc1155);
+    } else if (erc === 'formatByNft') {
+      let userToken = await User.findOne({ address }, 'address erc721tokens').populate({
+        path: 'erc721tokens',
+        model: ERC721Token,
+        options: {
+          skip,
+          limit,
+        },
+        select: ['tokenId', 'tokenURI', 'name', 'image', 'description', 'nft'],
+        populate: {
+          path: 'nft',
+          model: NFT,
+          select: ['name', 'symbol', 'address'],
+        },
+      });
+      let objUser = {};
+      await userToken.erc721tokens.forEach((token) => {
+        objUser[token.nft._id.toString()] = {
+          name: token.nft.name,
+          symbol: token.nft.symbol,
+          tokens:
+            objUser[token.nft._id.toString()] && objUser[token.nft._id.toString()].tokens
+              ? objUser[token.nft._id.toString()].tokens
+              : [],
+        };
+
+        objUser[token.nft._id.toString()].tokens.push({
+          index: token.tokenId,
+          tokenURI: token.tokenURI,
+          addressToken: token.nft.address,
+          is1155: false,
+        });
+
+        objUser[token.nft._id.toString()].balanceOf =
+          objUser[token.nft._id.toString()].tokens.length;
+      });
+      user = [];
+      for (var key in objUser) {
+        user.push(objUser[key]);
+      }
     } else {
       return res.status(401).json({ message: 'wrong parameter' });
     }

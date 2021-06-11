@@ -21,7 +21,7 @@ const EventStream = async () => {
       if (isERC1155) {
         console.log(nftAddress + ': is erc1155');
       } else {
-        updateERC721FromAcceptedList(nftAddress);
+        updateERC721FromAcceptedList(nftAddress.toLowerCase(), false);
       }
     };
 
@@ -32,8 +32,8 @@ const EventStream = async () => {
     if (isErc1155) {
       console.log(nftAddress + ': is erc1155');
     } else {
-      updateERC721FromAcceptedList(nftAddress);
-      openListenERC721Event(nftAddress);
+      updateERC721FromAcceptedList(nftAddress, true);
+      openListenERC721Event(nftAddress.toLowerCase());
     }
   });
 
@@ -71,7 +71,7 @@ const EventStream = async () => {
   });
 };
 
-const updateERC721FromAcceptedList = async (nftAddress) => {
+const updateERC721FromAcceptedList = async (nftAddress, isUserCreate) => {
   try {
     let isNFTExist = await NFT.findOne({ address: nftAddress });
     if (!isNFTExist) {
@@ -80,7 +80,7 @@ const updateERC721FromAcceptedList = async (nftAddress) => {
       let erc721token = {};
       erc721token.name = await instance.name();
       erc721token.symbol = await instance.symbol();
-      erc721token.addressToken = instance.address;
+      erc721token.addressToken = instance.address.toLowerCase();
 
       let nft = new NFT({
         name: erc721token.name,
@@ -91,48 +91,50 @@ const updateERC721FromAcceptedList = async (nftAddress) => {
 
       let recordedNFT = await nft.save();
 
-      erc721token.tokens = [];
-      // max 999999 id, it will break if undefined
-      for (let i = 1; i < 999999; i++) {
-        let tokenURI = await instance.tokenURI(i);
-        if (tokenURI) {
-          let cid = tokenURI.split('/');
-          tokenURI = 'https://storage.mochi.market/ipfs/' + cid[cid.length - 1];
-          try {
-            let req = await axios.get(tokenURI);
+      if (!isUserCreate) {
+        erc721token.tokens = [];
+        // max 999999 id, it will break if undefined
+        for (let i = 1; i < 999999; i++) {
+          let tokenURI = await instance.tokenURI(i);
+          if (tokenURI) {
+            let cid = tokenURI.split('/');
+            tokenURI = 'https://storage.mochi.market/ipfs/' + cid[cid.length - 1];
+            try {
+              let req = await axios.get(tokenURI);
 
-            let erc721 = new ERC721Token({
-              tokenId: i,
-              tokenURI: tokenURI,
-              name: !!req.data.name ? req.data.name : 'Unnamed',
-              image: !!req.data.image ? req.data.image : '',
-              description: !!req.data.description ? req.data.description : '',
-              nft: recordedNFT.id,
-            });
+              let erc721 = new ERC721Token({
+                tokenId: i,
+                tokenURI: tokenURI,
+                name: !!req.data.name ? req.data.name : 'Unnamed',
+                image: !!req.data.image ? req.data.image : '',
+                description: !!req.data.description ? req.data.description : '',
+                nft: recordedNFT.id,
+              });
 
-            // save ERC721
-            let recordedERC721 = await erc721.save();
+              // save ERC721
+              let recordedERC721 = await erc721.save();
 
-            // update NFT
-            await NFT.updateOne(
-              { _id: recordedNFT._id },
-              { $push: { tokens: recordedERC721._id } }
-            );
+              // update NFT
+              await NFT.updateOne(
+                { _id: recordedNFT._id },
+                { $push: { tokens: recordedERC721._id } }
+              );
 
-            // update owner
-            let ownerAddress = await getOwner(erc721token.addressToken, i);
-            console.log({ ownerAddress });
-            // update owner
+              // update owner
+              let ownerAddress = await getOwner(erc721token.addressToken, i);
+              console.log({ ownerAddress });
+              // update owner
 
-            await User.findOneAndUpdate(
-              { address: ownerAddress },
-              { expire: new Date(), $push: { erc721tokens: recordedERC721._id } },
-              { upsert: true, new: true, setDefaultsOnInsert: true }
-            );
-          } catch (error) {
-            console.log({ error });
-          }
-        } else break;
+              await User.findOneAndUpdate(
+                { address: ownerAddress.toLowerCase() },
+                { expire: new Date(), $push: { erc721tokens: recordedERC721._id } },
+                { upsert: true, new: true, setDefaultsOnInsert: true }
+              );
+            } catch (error) {
+              console.log({ error });
+            }
+          } else break;
+        }
       }
     }
     // else {
@@ -172,8 +174,6 @@ const openListenERC721Event = (nftAddress) => {
               nft: recordedNFT._id,
             });
 
-            console.log(erc721);
-
             // save ERC721
             let recordedERC721 = await erc721.save();
 
@@ -185,13 +185,13 @@ const openListenERC721Event = (nftAddress) => {
 
             // already owned by the user?
             let alreadyOwned = await User.findOne({
-              address: to,
+              address: to.toLowerCase(),
               erc721tokens: { $in: recordedERC721._id },
             });
 
             if (!alreadyOwned) {
               await User.findOneAndUpdate(
-                { address: to },
+                { address: to.toLowerCase() },
                 { expire: new Date(), $push: { erc721tokens: recordedERC721._id } },
                 { upsert: true, new: true, setDefaultsOnInsert: true }
               );
