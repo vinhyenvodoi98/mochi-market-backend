@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const { EventStream } = require('./helpers/listenEvent');
+const { EventStream, OldEventStream } = require('./helpers/listenEvent');
 
 const app = express();
 
@@ -21,7 +21,7 @@ async function main() {
 
   mongoose.connect(
     process.env.MONGODB_URI,
-    { useUnifiedTopology: true, useNewUrlParser: true },
+    { useUnifiedTopology: true, useNewUrlParser: true, useFindAndModify: false },
     (error) => {
       if (error) console.log(error);
     }
@@ -40,6 +40,8 @@ async function main() {
     },
   };
 
+  // new event around 5k block so we need create event listen of old collection
+  OldEventStream();
   EventStream();
 
   // app.use(cors());
