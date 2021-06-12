@@ -59,7 +59,6 @@ const EventStream = async () => {
         }
       }
     };
-
     saveNft();
   });
 
@@ -67,13 +66,38 @@ const EventStream = async () => {
     const updateNft = async () => {
       await SellOrder.findOneAndUpdate({ sellId: sellId.toString() }, { isActive: false });
     };
+    console.log('SellOrderDeactive');
+    console.log(seller, sellId, nftAddress, tokenId, price, token);
     updateNft();
   });
 
   sellOrderInstance.on(
     'SellOrderCompleted',
-    (seller, sellId, buyer, nftAddress, tokenId, price, amount, token) => {
-      console.log(seller, sellId, buyer, nftAddress, tokenId, price, amount, token);
+    (sellId, seller, buyer, nftAddress, tokenId, price, amount, token) => {
+      const updateNft = async () => {
+        let { tokens } = await NFT.findOne({
+          address: nftAddress.toLowerCase(),
+        }).populate({
+          path: 'tokens',
+          model: ERC721Token,
+          match: [{ tokenId: parseInt(tokenId.toString()) }],
+        });
+
+        // remove erc721 of seller
+        await User.updateOne(
+          { address: seller.toLowerCase() },
+          { $pull: { erc721tokens: tokens[0]._id } }
+        );
+        // update erc721 for buyer
+        await User.updateOne(
+          { address: buyer.toLowerCase() },
+          { $push: { erc721tokens: tokens[0]._id } }
+        );
+        // remove sellorder
+        await SellOrder.deleteOne({ sellId: sellId.toString() });
+      };
+
+      updateNft();
     }
   );
 };
