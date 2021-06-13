@@ -33,7 +33,7 @@ router.get('/:address/:erc', async (req, res) => {
   const limit = parseInt(req.query.limit);
   address = address.toLowerCase();
   try {
-    let user = {};
+    let user = [];
     if (erc === 'erc721') {
       user = await User.findOne({ address }, 'address erc721tokens').populate({
         path: 'erc721tokens',
