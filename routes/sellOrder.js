@@ -34,7 +34,7 @@ router.get('/:filter', async (req, res) => {
 
           let newSellOrder = {
             sellId: order.sellId,
-            amount: order.sellId,
+            amount: order.amount,
             soldAmount: order.soldAmount,
             seller: order.seller,
             price: order.price,
@@ -70,7 +70,7 @@ router.get('/:filter', async (req, res) => {
 
           let newSellOrder = {
             index: order.sellId,
-            amount: order.sellId,
+            amount: order.amount,
             soldAmount: order.soldAmount,
             seller: order.seller,
             price: order.price,
@@ -109,8 +109,8 @@ router.get('/:filter', async (req, res) => {
           });
 
           let newSellOrder = {
-            index: order.sellId,
-            amount: order.sellId,
+            index: order.tokenId,
+            amount: order.amount,
             soldAmount: order.soldAmount,
             seller: order.seller,
             price: order.price,
@@ -144,6 +144,37 @@ router.get('/:filter', async (req, res) => {
       for (var key in objOrder) {
         sellOrders.push(objOrder[key]);
       }
+    } else if (filter === 'availableSellOrderERC721') {
+      let orders = await SellOrder.find(
+        { isActive: true },
+        'sellId nftAddress tokenId amount soldAmount seller price token isActive sellTime buyers buyTimes',
+        {
+          skip,
+          limit,
+        }
+      );
+
+      sellOrders = await Promise.all(
+        orders.map(async (order) => {
+          let nft = await NFT.findOne({ _id: order.nftAddress }, 'address');
+
+          let newSellOrder = {
+            sellId: order.sellId,
+            amount: order.amount,
+            sellTime: order.sellTime,
+            buyers: order.buyers,
+            buyTimes: order.buyTimes,
+            tokenId: order.tokenId.toString(),
+            soldAmount: order.soldAmount,
+            seller: order.seller,
+            price: order.price,
+            token: order.token,
+            nftAddress: nft.address,
+          };
+
+          return newSellOrder;
+        })
+      );
     }
 
     return res.json(sellOrders);
@@ -182,8 +213,8 @@ router.get('/user/:address', async (req, res) => {
         );
 
         let newSellOrder = {
-          index: order.sellId,
-          amount: order.sellId,
+          index: order.tokenId,
+          amount: order.amount,
           soldAmount: order.soldAmount,
           seller: order.seller,
           price: order.price,

@@ -6,6 +6,7 @@ const SellOrder = require('../models/SellOrder');
 const { initERC721Single } = require('./blockchain');
 const { default: axios } = require('axios');
 const User = require('../models/User');
+const { getContractAddress } = require('../utils/getContractAddress');
 
 const OldEventStream = async () => {
   let nfts = await NFT.find({}, 'address');
@@ -43,15 +44,15 @@ const EventStream = async () => {
     const saveNft = async () => {
       let isSellExist = await SellOrder.findOne({ sellId: sellId.toString() });
       if (!isSellExist) {
-        let nft = await NFT.findOne({ address: nftAddress });
+        let nft = await NFT.findOne({ address: nftAddress.toLowerCase() });
         if (!!nft) {
           let sellOrder = new SellOrder({
             sellId: sellId.toString(),
             nftAddress: nft._id,
             tokenId: parseInt(tokenId.toString()),
-            seller,
+            seller: seller.toLowerCase(),
             price: price.toString(),
-            token,
+            token: token.toLowerCase(),
             isActive: true,
           });
 
@@ -59,16 +60,33 @@ const EventStream = async () => {
         }
       }
     };
-
     saveNft();
   });
 
   sellOrderInstance.on('SellOrderDeactive', (seller, sellId, nftAddress, tokenId, price, token) => {
-    const UpdateNft = async () => {
+    const updateNft = async () => {
       await SellOrder.findOneAndUpdate({ sellId: sellId.toString() }, { isActive: false });
     };
+    console.log('SellOrderDeactive');
+    console.log(seller, sellId, nftAddress, tokenId, price, token);
     updateNft();
   });
+
+  sellOrderInstance.on(
+    'SellOrderCompleted',
+    (sellId, seller, buyer, nftAddress, tokenId, price, amount, token) => {
+      console.log('\n\n SellOrderCompleted from :', seller);
+      console.log('to :', buyer, '\n\n');
+
+      const updateNft = async () => {
+        await transferERC(nftAddress, tokenId, seller, buyer);
+        // remove sellorder
+        await SellOrder.deleteOne({ sellId: sellId.toString() });
+      };
+
+      updateNft();
+    }
+  );
 };
 
 const updateERC721FromAcceptedList = async (nftAddress, isUserCreate) => {
@@ -147,6 +165,7 @@ const updateERC721FromAcceptedList = async (nftAddress, isUserCreate) => {
 
 const openListenERC721Event = (nftAddress) => {
   const instance = initERC721Single(nftAddress);
+  const contractAddress = getContractAddress(process.env.CHAIN_ID);
 
   instance.on('Transfer', (from, to, tokenId) => {
     const saveERC721 = async () => {
@@ -207,7 +226,31 @@ const openListenERC721Event = (nftAddress) => {
     if (from === '0x0000000000000000000000000000000000000000') {
       saveERC721();
     }
+    // when buy and sell it trigger tranfer to market
+    else if (
+      from.toLowerCase() !== contractAddress.Market.toLowerCase() &&
+      to.toLowerCase() !== contractAddress.Market.toLowerCase()
+    ) {
+      transferERC(nftAddress, tokenId, from, to);
+    }
   });
+};
+
+const transferERC = async (nftAddress, tokenId, from, to) => {
+  let { tokens } = await NFT.findOne({
+    address: nftAddress.toLowerCase(),
+  }).populate({
+    path: 'tokens',
+    model: ERC721Token,
+    match: [{ tokenId: parseInt(tokenId.toString()) }],
+  });
+
+  // remove erc721 of seller
+  await User.updateOne({ address: from.toLowerCase() }, { $pull: { erc721tokens: tokens[0]._id } });
+  // update erc721 for buyer
+  await User.updateOne({ address: to.toLowerCase() }, { $push: { erc721tokens: tokens[0]._id } });
+  // remove sellorder
+  await SellOrder.deleteOne({ sellId: sellId.toString() });
 };
 
 module.exports = {
