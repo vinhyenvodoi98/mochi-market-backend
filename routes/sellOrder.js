@@ -175,6 +175,40 @@ router.get('/:filter', async (req, res) => {
           return newSellOrder;
         })
       );
+    } else if (filter === 'sortByPrice') {
+      let orders = await SellOrder.find(
+        { isActive: true },
+        'sellId nftAddress tokenId amount soldAmount seller price token isActive sellTime buyers buyTimes',
+        {
+          skip,
+          limit,
+          sort: {
+            price: 1, //Sort by Date Added ASC
+          },
+        }
+      );
+
+      sellOrders = await Promise.all(
+        orders.map(async (order) => {
+          let nft = await NFT.findOne({ _id: order.nftAddress }, 'address');
+
+          let newSellOrder = {
+            sellId: order.sellId,
+            amount: order.amount,
+            sellTime: order.sellTime,
+            buyers: order.buyers,
+            buyTimes: order.buyTimes,
+            tokenId: order.tokenId.toString(),
+            soldAmount: order.soldAmount,
+            seller: order.seller,
+            price: order.price,
+            token: order.token,
+            nftAddress: nft.address,
+          };
+
+          return newSellOrder;
+        })
+      );
     }
 
     return res.json(sellOrders);
