@@ -25,7 +25,7 @@ const SellOrderSchema = new Schema(
       required: true,
     },
     price: {
-      type: String,
+      type: Number,
       required: true,
     },
     token: {

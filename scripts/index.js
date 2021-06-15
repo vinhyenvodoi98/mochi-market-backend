@@ -124,7 +124,7 @@ const fetchSellOrder = async () => {
         amount: availableSellOrder.amount.toString(),
         soldAmount: availableSellOrder.soldAmount.toString(),
         seller: availableSellOrder.seller.toLowerCase(),
-        price: availableSellOrder.price.toString(),
+        price: parseInt(availableSellOrder.price.toString()),
         token: availableSellOrder.token.toLowerCase(),
         isActive: availableSellOrder.isActive,
         sellTime: availableSellOrder.sellTime.toString(),

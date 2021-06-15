@@ -73,4 +73,27 @@ router.post('/transfer', async (req, res) => {
   }
 });
 
+router.get('/:address/:tokenId', async (req, res) => {
+  var { address, tokenId } = req.params;
+  address = address.toLowerCase();
+  const skip = parseInt(req.query.skip);
+  const limit = parseInt(req.query.limit);
+
+  try {
+    let token = await NFT.findOne({ address }, 'tags name symbol address onModel', {
+      skip,
+      limit,
+    }).populate({
+      path: 'tokens',
+      model: ERC721Token,
+      match: { tokenId },
+      select: ['tokenId', 'tokenURI', 'name', 'image', 'description'],
+    });
+    if (!!token && token.tokens.length > 0) return res.json(token.tokens[0]);
+    else return res.json(null);
+  } catch (err) {
+    return res.status(500).end();
+  }
+});
+
 module.exports = router;

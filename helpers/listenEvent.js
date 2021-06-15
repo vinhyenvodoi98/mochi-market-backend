@@ -51,7 +51,7 @@ const EventStream = async () => {
             nftAddress: nft._id,
             tokenId: parseInt(tokenId.toString()),
             seller: seller.toLowerCase(),
-            price: price.toString(),
+            price: parseInt(price.toString()),
             token: token.toLowerCase(),
             isActive: true,
           });
