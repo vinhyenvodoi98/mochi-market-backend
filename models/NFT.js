@@ -30,6 +30,7 @@ const NFTSchema = new Schema(
       required: true,
       enum: ['ERC721Token', 'ERC1155Token'],
     },
+    isVerify: { type: Boolean, default: false },
   },
   {
     timestamps: true,
