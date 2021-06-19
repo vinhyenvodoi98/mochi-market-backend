@@ -37,7 +37,7 @@ router.get('/:filter', async (req, res) => {
             amount: order.amount,
             soldAmount: order.soldAmount,
             seller: order.seller,
-            price: order.price,
+            price: order.price.toString(),
             token: order.token,
             nft,
           };
@@ -69,7 +69,7 @@ router.get('/:filter', async (req, res) => {
           });
 
           let newSellOrder = {
-            index: order.sellId,
+            index: nft.tokens[0].tokenId,
             amount: order.amount,
             soldAmount: order.soldAmount,
             seller: order.seller,
@@ -251,7 +251,7 @@ router.get('/user/:address', async (req, res) => {
           amount: order.amount,
           soldAmount: order.soldAmount,
           seller: order.seller,
-          price: order.price,
+          price: order.price.toString(),
           tokenPayment: order.token,
           collections: nft.name,
           symbolCollections: nft.symbol,
