@@ -15,6 +15,7 @@ const UserSchema = new Schema(
     },
     erc721tokens: [{ type: Schema.Types.ObjectId, ref: 'ERC721Token' }],
     erc1155tokens: [{ type: Schema.Types.ObjectId, ref: 'ERC1155Token' }],
+    isVerify: { type: Boolean, default: false },
   },
   {
     timestamps: true,
