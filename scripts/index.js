@@ -7,6 +7,7 @@ const SellOrder = require('../models/SellOrder');
 
 const { getAcceptedNfts, initERC721, getOwner } = require('../helpers/blockchain');
 const { getSellOrderListInstance } = require('../utils/getContractInstance');
+const { utils } = require('ethers');
 
 require('dotenv').config();
 
@@ -124,7 +125,7 @@ const fetchSellOrder = async () => {
         amount: availableSellOrder.amount.toString(),
         soldAmount: availableSellOrder.soldAmount.toString(),
         seller: availableSellOrder.seller.toLowerCase(),
-        price: parseInt(availableSellOrder.price.toString()),
+        price: parseFloat(utils.formatEther(availableSellOrder.price.toString())),
         token: availableSellOrder.token.toLowerCase(),
         isActive: availableSellOrder.isActive,
         sellTime: availableSellOrder.sellTime.toString(),
