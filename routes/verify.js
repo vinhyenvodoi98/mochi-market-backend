@@ -21,6 +21,16 @@ router.post('/nft', body('isVerify').isBoolean(), async (req, res) => {
   }
 });
 
+router.get('/nft', async (req, res) => {
+  try {
+    let addresses = await NFT.find({ isVerify: true }, 'address');
+    arrAdd = addresses.map((add) => add.address);
+    return res.json(arrAdd);
+  } catch (err) {
+    return res.json([]);
+  }
+});
+
 router.get('/nft/:address', async (req, res) => {
   var { address } = req.params;
   address = address.toLowerCase();
@@ -54,6 +64,16 @@ router.post(
     }
   }
 );
+
+router.get('/user', async (req, res) => {
+  try {
+    let addresses = await User.find({ isVerify: true }, 'address');
+    arrAdd = addresses.map((add) => add.address);
+    return res.json(arrAdd);
+  } catch (err) {
+    return res.json([]);
+  }
+});
 
 router.get('/user/:address', async (req, res) => {
   var { address } = req.params;
