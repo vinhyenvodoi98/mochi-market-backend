@@ -24,3 +24,5 @@ node script/index.js erc721
 | /verify/nft/:address     | Get    | /verify/nft/0x69...F529                      | return `{ "isVerify": true }` if nft verified                |
 | /verify/user             | Post   | /verify/user                                 | request body `{ "address": "0x69...F529","isVerify": true }` |
 | /verify/nft              | Post   | /verify/nft                                  | request body `{ "address": "0x69...F529","isVerify": true }` |
+| /verify/nft              | Get    | /verify/nft                                  | return all nft address verified                              |
+| /verify/user             | Get    | /verify/user                                 | return all user address verified                             |
