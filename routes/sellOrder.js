@@ -3,6 +3,7 @@ const router = express.Router();
 const SellOrder = require('../models/SellOrder');
 const ERC721Token = require('../models/ERC721Token');
 const NFT = require('../models/NFT');
+const { utils } = require('ethers');
 
 router.get('/:filter', async (req, res) => {
   const skip = parseInt(req.query.skip);
@@ -37,7 +38,7 @@ router.get('/:filter', async (req, res) => {
             amount: order.amount,
             soldAmount: order.soldAmount,
             seller: order.seller,
-            price: order.price.toString(),
+            price: utils.parseEther(order.price.toString()).toString(),
             token: order.token,
             nft,
           };
@@ -73,7 +74,7 @@ router.get('/:filter', async (req, res) => {
             amount: order.amount,
             soldAmount: order.soldAmount,
             seller: order.seller,
-            price: order.price.toString(),
+            price: utils.parseEther(order.price.toString()).toString(),
             tokenPayment: order.token,
             collections: nft.name,
             symbolCollections: nft.symbol,
@@ -113,7 +114,7 @@ router.get('/:filter', async (req, res) => {
             amount: order.amount,
             soldAmount: order.soldAmount,
             seller: order.seller,
-            price: order.price.toString(),
+            price: utils.parseEther(order.price.toString()).toString(),
             tokenPayment: order.token,
             collections: nft.name,
             symbolCollections: nft.symbol,
@@ -167,7 +168,7 @@ router.get('/:filter', async (req, res) => {
             tokenId: order.tokenId.toString(),
             soldAmount: order.soldAmount,
             seller: order.seller,
-            price: order.price.toString(),
+            price: utils.parseEther(order.price.toString()).toString(),
             token: order.token,
             nftAddress: nft.address,
           };
@@ -201,7 +202,7 @@ router.get('/:filter', async (req, res) => {
             tokenId: order.tokenId.toString(),
             soldAmount: order.soldAmount,
             seller: order.seller,
-            price: order.price.toString(),
+            price: utils.parseEther(order.price.toString()).toString(),
             token: order.token,
             nftAddress: nft.address,
           };
@@ -251,7 +252,7 @@ router.get('/user/:address', async (req, res) => {
           amount: order.amount,
           soldAmount: order.soldAmount,
           seller: order.seller,
-          price: order.price.toString(),
+          price: utils.parseEther(order.price.toString()).toString(),
           tokenPayment: order.token,
           collections: nft.name,
           symbolCollections: nft.symbol,
