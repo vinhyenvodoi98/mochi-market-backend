@@ -26,3 +26,10 @@ node script/index.js erc721
 | /verify/nft              | Post   | /verify/nft                                  | request body `{ "address": "0x69...F529","isVerify": true }` |
 | /verify/nft              | Get    | /verify/nft                                  | return all nft address verified                              |
 | /verify/user             | Get    | /verify/user                                 | return all user address verified                             |
+
+verify address all network
+| API | Method | Example | Explain |
+| ------------------------ | ------ | -------------------------------------------- | ------------------------------------------------------------ |
+| /verifyAllNetwork | Post | /verifyAllNetwork | request body `{ "address": "0x69...F529","network": 97 }` |
+| /verifyAllNetwork?network= | Get | /verifyAllNetwork?network=97 | return all verified address of network |
+| /verifyAllNetwork/:address | Delete | /verifyAllNetwork/0x69...F529 | delete verified address |

@@ -19,6 +19,7 @@ async function main() {
   const userRouter = require('./routes/user');
   const verifyRouter = require('./routes/verify');
   const sellOrderRouter = require('./routes/sellOrder');
+  const verifyAllNetworkRouter = require('./routes/verifyAllNetwork');
 
   mongoose.connect(
     process.env.MONGODB_URI,
@@ -57,6 +58,7 @@ async function main() {
   app.use('/user', cors(corsOptions), userRouter);
   app.use('/sellOrder', cors(corsOptions), sellOrderRouter);
   app.use('/verify', cors(corsOptions), verifyRouter);
+  app.use('/verifyAllNetwork', cors(corsOptions), verifyAllNetworkRouter);
 
   // catch 404 and forward to error handler
   app.use((req, res, next) => {
