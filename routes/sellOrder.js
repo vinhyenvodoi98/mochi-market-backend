@@ -53,6 +53,9 @@ router.get('/:filter', async (req, res) => {
         {
           skip,
           limit,
+          sort: {
+            _id: -1,
+          },
         }
       );
 
@@ -93,6 +96,9 @@ router.get('/:filter', async (req, res) => {
         {
           skip,
           limit,
+          sort: {
+            _id: -1,
+          },
         }
       );
 
@@ -152,6 +158,9 @@ router.get('/:filter', async (req, res) => {
         {
           skip,
           limit,
+          sort: {
+            _id: -1,
+          },
         }
       );
 
