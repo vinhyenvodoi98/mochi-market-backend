@@ -7,6 +7,7 @@ const { initERC721Single } = require('./blockchain');
 const { default: axios } = require('axios');
 const User = require('../models/User');
 const { getContractAddress } = require('../utils/getContractAddress');
+const { utils } = require('ethers');
 
 const OldEventStream = async () => {
   let nfts = await NFT.find({}, 'address');
