@@ -247,11 +247,17 @@ const transferERC = async (nftAddress, tokenId, from, to) => {
   });
 
   // remove erc721 of seller
-  await User.updateOne({ address: from.toLowerCase() }, { $pull: { erc721tokens: tokens[0]._id } });
+  let remove = await User.updateOne(
+    { address: from.toLowerCase() },
+    { $pull: { erc721tokens: tokens[0]._id } }
+  );
   // update erc721 for buyer
-  await User.updateOne({ address: to.toLowerCase() }, { $push: { erc721tokens: tokens[0]._id } });
-  // remove sellorder
-  await SellOrder.deleteOne({ sellId: sellId.toString() });
+  let update = await User.update(
+    { address: to.toLowerCase() },
+    { $push: { erc721tokens: tokens[0]._id } },
+    { new: true, upsert: true }
+  );
+  console.log('nftAddress ' + nftAddress + 'from :' + from + 'to :' + to);
 };
 
 module.exports = {
