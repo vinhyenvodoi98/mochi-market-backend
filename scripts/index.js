@@ -50,6 +50,7 @@ let getERC721 = async (instance) => {
         let tokenURI;
         try {
           tokenURI = await instance.tokenURI(i);
+          if (tokenURI.length === 0) break;
         } catch (error) {
           break;
         }
@@ -75,12 +76,11 @@ let getERC721 = async (instance) => {
               { _id: recordedNFT._id },
               { $push: { tokens: recordedERC721._id } }
             );
-
+            console.log('nft : ' + ERC721token.name + ': id :' + i);
             // update owner
             let ownerAddress = await getOwner(ERC721token.addressToken, i);
-            console.log({ ownerAddress });
-            // update owner
 
+            // update owner
             await User.findOneAndUpdate(
               { address: ownerAddress.toLowerCase() },
               { expire: new Date(), $push: { erc721tokens: recordedERC721._id } },
@@ -119,6 +119,8 @@ const fetchErc721 = async () => {
 const fetchNftByAddress = async (nftAddress) => {
   const instance = await initERC721Single(nftAddress);
   await getERC721(instance);
+  console.log('DONE');
+  process.exit(0);
 };
 
 const fetchSellOrder = async () => {
