@@ -32,15 +32,16 @@ const SellOrderSchema = new Schema(
       type: String,
       required: true,
     },
-    isActive: {
-      type: Boolean,
-      required: true,
-    },
     sellTime: {
       type: String,
     },
     buyers: [],
     buyTimes: [],
+    status: {
+      type: String,
+      enum: ['Create', 'Complete', 'Cancel'],
+      default: 'Create',
+    },
   },
   {
     timestamps: true,

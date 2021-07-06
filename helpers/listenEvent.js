@@ -66,23 +66,21 @@ const EventStream = async () => {
 
   sellOrderInstance.on('SellOrderDeactive', (seller, sellId, nftAddress, tokenId, price, token) => {
     const updateNft = async () => {
-      await SellOrder.findOneAndUpdate({ sellId: sellId.toString() }, { isActive: false });
+      await SellOrder.findOneAndUpdate({ sellId: sellId.toString() }, { status: 'Cancel' });
     };
-    console.log('SellOrderDeactive');
-    console.log(seller, sellId, nftAddress, tokenId, price, token);
+    console.log('\n\nCancel SellId :' + sellId + '\n\n');
     updateNft();
   });
 
   sellOrderInstance.on(
     'SellOrderCompleted',
     (sellId, seller, buyer, nftAddress, tokenId, price, amount, token) => {
-      console.log('\n\n SellOrderCompleted from :', seller);
-      console.log('to :', buyer, '\n\n');
+      console.log('\n\n SellOrderCompleted from :' + seller + 'to :', buyer, '\n\n');
 
       const updateNft = async () => {
         await transferERC(nftAddress, tokenId, seller, buyer);
-        // remove sellorder
-        await SellOrder.deleteOne({ sellId: sellId.toString() });
+        // Complete sellorder
+        await SellOrder.findOneAndUpdate({ sellId: sellId.toString() }, { status: 'Complete' });
       };
 
       updateNft();
