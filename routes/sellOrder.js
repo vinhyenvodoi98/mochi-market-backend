@@ -13,7 +13,7 @@ router.get('/:filter', async (req, res) => {
   try {
     if (filter === 'getDetail') {
       let orders = await SellOrder.find(
-        { isActive: true },
+        { status: 'Create' },
         'sellId nftAddress tokenId amount soldAmount seller price token isActive sellTime buyers buyTimes',
         {
           skip,
@@ -48,7 +48,7 @@ router.get('/:filter', async (req, res) => {
       );
     } else if (filter === 'all') {
       let orders = await SellOrder.find(
-        { isActive: true },
+        { status: 'Create' },
         'sellId nftAddress tokenId amount soldAmount seller price token sellTime ',
         {
           skip,
@@ -91,7 +91,7 @@ router.get('/:filter', async (req, res) => {
       );
     } else if (filter === 'formatByNft') {
       let orders = await SellOrder.find(
-        { isActive: true },
+        { status: 'Create' },
         'sellId nftAddress tokenId amount soldAmount seller price token sellTime ',
         {
           skip,
@@ -153,7 +153,7 @@ router.get('/:filter', async (req, res) => {
       }
     } else if (filter === 'availableSellOrderERC721') {
       let orders = await SellOrder.find(
-        { isActive: true },
+        { status: 'Create' },
         'sellId nftAddress tokenId amount soldAmount seller price token isActive sellTime buyers buyTimes',
         {
           skip,
@@ -187,7 +187,7 @@ router.get('/:filter', async (req, res) => {
       );
     } else if (filter === 'sortByPrice') {
       let orders = await SellOrder.find(
-        { isActive: true },
+        { status: 'Create' },
         'sellId nftAddress tokenId amount soldAmount seller price token isActive sellTime buyers buyTimes',
         {
           skip,
@@ -236,7 +236,7 @@ router.get('/user/:address', async (req, res) => {
   let sellOrders;
   try {
     let orders = await SellOrder.find(
-      { isActive: true, seller: address },
+      { status: 'Create', seller: address },
       'sellId nftAddress tokenId amount soldAmount seller price token sellTime ',
       {
         skip,
