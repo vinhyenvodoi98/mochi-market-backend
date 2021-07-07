@@ -76,7 +76,7 @@ let getERC721 = async (instance) => {
               { _id: recordedNFT._id },
               { $push: { tokens: recordedERC721._id } }
             );
-            console.log('nft : ' + ERC721token.name + ': id :' + i);
+            console.log('nft : ' + ERC721token.name + ': id : ' + i);
             // update owner
             let ownerAddress = await getOwner(ERC721token.addressToken, i);
 
@@ -87,8 +87,34 @@ let getERC721 = async (instance) => {
               { upsert: true, new: true, setDefaultsOnInsert: true }
             );
           } catch (error) {
-            reject(error);
-            console.log(error);
+            let erc721 = new ERC721Token({
+              tokenId: i,
+              tokenURI: tokenURI,
+              name: 'Unnamed',
+              image: '',
+              description: '',
+              attributes: [],
+              nft: recordedNFT.id,
+            });
+
+            // save ERC721
+            let recordedERC721 = await erc721.save();
+
+            // update NFT
+            await NFT.updateOne(
+              { _id: recordedNFT._id },
+              { $push: { tokens: recordedERC721._id } }
+            );
+            console.log('nft : ' + ERC721token.name + ': id : ' + i);
+            // update owner
+            let ownerAddress = await getOwner(ERC721token.addressToken, i);
+
+            // update owner
+            await User.findOneAndUpdate(
+              { address: ownerAddress.toLowerCase() },
+              { expire: new Date(), $push: { erc721tokens: recordedERC721._id } },
+              { upsert: true, new: true, setDefaultsOnInsert: true }
+            );
           }
         } else {
           reject();
