@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { ethers } = require('ethers');
 const ERC721Artifacts = require('../contracts/ERC721.json');
+const ERC1155Artifacts = require('../contracts/MochiERC1155NFT.json');
 const { provider } = require('../utils/getProvider');
 const { getNftListInstance } = require('../utils/getContractInstance');
 
@@ -24,6 +25,10 @@ const initERC721Single = (nftAddress) => {
   return new ethers.Contract(nftAddress, ERC721Artifacts.abi, provider);
 };
 
+const initERC1155Single = (nftAddress) => {
+  return new ethers.Contract(nftAddress, ERC1155Artifacts.abi, provider);
+};
+
 const getNFTDetail = async (contractAddress, id) => {
   const erc721Instances = new ethers.Contract(contractAddress, ERC721Artifacts.abi, provider);
   const token = await erc721Instances.tokenURI(id);
@@ -41,6 +46,7 @@ module.exports = {
   getAcceptedNfts,
   initERC721,
   initERC721Single,
+  initERC1155Single,
   getNFTDetail,
   getOwner,
 };

@@ -10,8 +10,9 @@ const {
   initERC721,
   getOwner,
   initERC721Single,
+  initERC1155Single,
 } = require('../helpers/blockchain');
-const { getSellOrderListInstance } = require('../utils/getContractInstance');
+const { getSellOrderListInstance, getNftListInstance } = require('../utils/getContractInstance');
 const { utils } = require('ethers');
 
 require('dotenv').config();
@@ -128,6 +129,24 @@ let getERC721 = async (instance) => {
   });
 };
 
+const fetchErc1155 = async (nftAddress) => {
+  const instance = await initERC1155Single(nftAddress);
+  // Save ERC721 basic info
+  let name = await instance.name();
+  let symbol = await instance.symbol();
+  let addressToken = instance.address.toLowerCase();
+
+  let nft = new NFT({
+    name,
+    symbol,
+    address: addressToken,
+    onModel: 'ERC1155Token',
+  });
+
+  await nft.save();
+  console.log(`Erc1155 name : ${name}`);
+};
+
 const fetchErc721 = async () => {
   const nftList = await getAcceptedNfts();
   const erc721Instances = await initERC721(nftList);
@@ -190,6 +209,7 @@ const fetchSellOrder = async () => {
 const main = async () => {
   var myArgs = process.argv.slice(2);
   if (myArgs[0] === 'erc721') await fetchErc721();
+  if (myArgs[0] === 'erc1155') await fetchErc1155(myArgs[1]);
   else if (myArgs[0] === 'nftAddress') await fetchNftByAddress(myArgs[1]);
   // else if(myArgs[0]==='erc1155') ...
   else if (myArgs[0] === 'sellOrder') await fetchSellOrder();

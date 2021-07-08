@@ -18,11 +18,16 @@ const EventStream = async () => {
   let nftListInstance = getNftListInstance();
 
   nftListInstance.on('NFTAccepted', (nftAddress) => {
-    if (isErc1155) {
-      console.log(nftAddress + ': is erc1155');
-    } else {
-      openListenERC721Event(nftAddress.toLowerCase());
-    }
+    const checkERC = async () => {
+      let isERC1155 = await nftListInstance.isERC1155(nftAddress);
+      if (isERC1155) {
+        console.log(nftAddress + ': is erc1155');
+      } else {
+        updateERC721FromAcceptedList(nftAddress.toLowerCase(), false);
+      }
+    };
+
+    checkERC();
   });
 
   let sellOrderInstance = getSellOrderListInstance();
@@ -41,7 +46,6 @@ const EventStream = async () => {
             seller: seller.toLowerCase(),
             price: parseFloat(utils.formatEther(price.toString())),
             token: token.toLowerCase(),
-            isActive: true,
           });
 
           await sellOrder.save();
@@ -75,7 +79,10 @@ const EventStream = async () => {
       const updateNft = async () => {
         await transferERC(nftAddress, tokenId, seller, buyer);
         // Complete sellorder
-        await SellOrder.findOneAndUpdate({ sellId: sellId.toString() }, { status: 'Complete' });
+        await SellOrder.findOneAndUpdate(
+          { sellId: sellId.toString() },
+          { status: 'Complete', $push: { buyers: buyer } }
+        );
       };
 
       updateNft();
