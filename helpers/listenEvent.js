@@ -88,6 +88,19 @@ const EventStream = async () => {
       updateNft();
     }
   );
+
+  sellOrderInstance.on('PriceChanged', (sellId, newPrice) => {
+    console.log('\n\n PriceChanged sellId :' + sellId + '\n\n');
+
+    const updatePrice = async () => {
+      await SellOrder.findOneAndUpdate(
+        { sellId: sellId.toString() },
+        { price: parseFloat(utils.formatEther(newPrice.toString())) }
+      );
+    };
+
+    updatePrice();
+  });
 };
 
 const openListenERC721Event = (nftAddress) => {
