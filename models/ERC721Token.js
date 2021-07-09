@@ -16,6 +16,9 @@ const ERC721TokenSchema = new Schema(
     image: {
       type: String,
     },
+    thumb: {
+      type: String,
+    },
     attributes: [],
     description: {
       type: String,

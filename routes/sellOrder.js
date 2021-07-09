@@ -75,6 +75,7 @@ router.get('/:filter', async (req, res) => {
           let newSellOrder = {
             index: nft.tokens[0].tokenId,
             amount: order.amount,
+            sellId: order.sellId.toString(),
             soldAmount: order.soldAmount,
             seller: order.seller,
             price: utils.parseEther(order.price.toString()).toString(),
