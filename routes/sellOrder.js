@@ -34,7 +34,7 @@ router.get('/:filter', async (req, res) => {
           });
 
           let newSellOrder = {
-            sellId: order.sellId,
+            sellId: order.sellId.toString(),
             amount: order.amount,
             soldAmount: order.soldAmount,
             seller: order.seller,
@@ -169,7 +169,7 @@ router.get('/:filter', async (req, res) => {
           let nft = await NFT.findOne({ _id: order.nftAddress }, 'address');
 
           let newSellOrder = {
-            sellId: order.sellId,
+            sellId: order.sellId.toString(),
             amount: order.amount,
             sellTime: order.sellTime,
             buyers: order.buyers,
@@ -203,7 +203,7 @@ router.get('/:filter', async (req, res) => {
           let nft = await NFT.findOne({ _id: order.nftAddress }, 'address');
 
           let newSellOrder = {
-            sellId: order.sellId,
+            sellId: order.sellId.toString(),
             amount: order.amount,
             sellTime: order.sellTime,
             buyers: order.buyers,
