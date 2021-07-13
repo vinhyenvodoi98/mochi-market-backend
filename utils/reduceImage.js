@@ -37,7 +37,6 @@ const download_image = (url, image_path) =>
 
 const downQuality = async (image) => {
   if (image.length > 0) {
-    console.log({ image });
     let thumb = '';
     let isSuccess = await download_image(image, 'thumb.png');
     if (isSuccess) {
@@ -47,6 +46,8 @@ const downQuality = async (image) => {
       const ipfsHash = await uploadFileToIpfs(formData);
       thumb = 'https://storage.mochi.market/ipfs/' + ipfsHash;
     }
+
+    console.log({ thumb });
     fs.unlinkSync('thumb.png');
     fs.unlinkSync('thumb1.png');
     return thumb;
