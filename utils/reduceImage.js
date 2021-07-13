@@ -37,20 +37,24 @@ const download_image = (url, image_path) =>
 
 const downQuality = async (image) => {
   if (image.length > 0) {
-    let thumb = '';
-    let isSuccess = await download_image(image, 'thumb.png');
-    if (isSuccess) {
-      await sharp('thumb.png').resize(180, 225).toFile('thumb1.png');
-      let formData = new FormData();
-      formData.append('file', fs.createReadStream('thumb1.png'));
-      const ipfsHash = await uploadFileToIpfs(formData);
-      thumb = 'https://storage.mochi.market/ipfs/' + ipfsHash;
-    }
+    try {
+      let thumb = '';
+      let nonce = Math.floor(Math.random() * 900000000300000000000) + 1000000000000000;
+      let isSuccess = await download_image(image, `thumb${nonce}.png`);
+      if (isSuccess) {
+        await sharp(`thumb${nonce}.png`).resize(180, 225).toFile(`thumb${nonce}1.png`);
+        let formData = new FormData();
+        formData.append('file', fs.createReadStream(`thumb${nonce}1.png`));
+        const ipfsHash = await uploadFileToIpfs(formData);
+        thumb = 'https://storage.mochi.market/ipfs/' + ipfsHash;
+      }
 
-    console.log({ thumb });
-    fs.unlinkSync('thumb.png');
-    fs.unlinkSync('thumb1.png');
-    return thumb;
+      fs.unlinkSync(`thumb${nonce}.png`);
+      fs.unlinkSync(`thumb${nonce}1.png`);
+      return thumb;
+    } catch (error) {
+      console.log(error);
+    }
   }
 };
 

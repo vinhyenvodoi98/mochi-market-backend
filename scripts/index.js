@@ -29,18 +29,16 @@ mongoose.set('useCreateIndex', true);
 
 let updateThumb = async (erc) => {
   return new Promise(async (resolve, reject) => {
-    setTimeout(async () => {
-      try {
-        if (!!erc.image && erc.image.length > 0 && !erc.thumb) {
-          let thumb = await downQuality(erc.image);
-          await ERC721Token.findOneAndUpdate({ _id: erc._id }, { thumb });
-          console.log('Down quality tokenId :' + erc.tokenId);
-        }
-        resolve();
-      } catch (error) {
-        reject();
+    try {
+      if (!!erc.image && erc.image.length > 0 && !erc.thumb) {
+        let thumb = await downQuality(erc.image);
+        await ERC721Token.findOneAndUpdate({ _id: erc._id }, { thumb });
+        console.log('Down quality tokenId :' + erc.tokenId);
       }
-    }, 3000);
+      resolve();
+    } catch (error) {
+      reject();
+    }
   });
 };
 
@@ -226,11 +224,11 @@ const fetchSellOrder = async () => {
 
 const reduceImageQuality = async (nftAddress, tokenId) => {
   var ercImages;
-  if (nftAddress === undefined) ercImages = await ERC721Token.find({}, 'image tokenId');
+  if (!nftAddress) ercImages = await ERC721Token.find({}, 'image tokenId');
   else {
-    if (tokenId === undefined) {
+    if (!tokenId) {
       ercImages = await NFT.find(
-        { address: nftAddress },
+        { address: nftAddress.toLowerCase() },
         'tags name symbol address onModel'
       ).populate({
         path: 'tokens',
@@ -241,7 +239,7 @@ const reduceImageQuality = async (nftAddress, tokenId) => {
       ercImages = ercImages[0].tokens;
     } else {
       ercImages = await NFT.find(
-        { address: nftAddress },
+        { address: nftAddress.toLowerCase() },
         'tags name symbol address onModel'
       ).populate({
         path: 'tokens',
@@ -256,7 +254,10 @@ const reduceImageQuality = async (nftAddress, tokenId) => {
 
   await Promise.all(
     ercImages.map(async (erc) => {
-      return await updateThumb(erc);
+      if (!!erc.image && erc.image.length > 0 && !erc.thumb) {
+        console.log('token' + erc.tokenId);
+        return await updateThumb(erc);
+      }
     })
   );
 
