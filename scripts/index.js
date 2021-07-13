@@ -14,6 +14,7 @@ const {
 } = require('../helpers/blockchain');
 const { getSellOrderListInstance, getNftListInstance } = require('../utils/getContractInstance');
 const { utils } = require('ethers');
+const { downQuality } = require('../utils/reduceImage');
 
 require('dotenv').config();
 
@@ -25,6 +26,21 @@ mongoose.connect(
   }
 );
 mongoose.set('useCreateIndex', true);
+
+let updateThumb = async (erc) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (erc.image.length > 0) {
+        let thumb = await downQuality(erc.image);
+        await ERC721Token.findOneAndUpdate({ _id: erc._id }, { thumb });
+        console.log('Down quality tokenId :' + erc.tokenId);
+      }
+      resolve();
+    } catch (error) {
+      reject();
+    }
+  });
+};
 
 let getERC721 = async (instance) => {
   return new Promise(async (resolve, reject) => {
@@ -206,12 +222,38 @@ const fetchSellOrder = async () => {
   );
 };
 
+const reduceImageQuality = async (nftAddress) => {
+  var ercImages;
+  if (nftAddress === undefined) ercImages = await ERC721Token.find({}, 'image tokenId');
+  else {
+    ercImages = await NFT.find(
+      { address: nftAddress },
+      'tags name symbol address onModel'
+    ).populate({
+      path: 'tokens',
+      model: ERC721Token,
+      select: ['tokenId', 'image'],
+    });
+
+    ercImages = ercImages[0].tokens;
+  }
+
+  await Promise.all(
+    ercImages.map(async (erc) => {
+      return await updateThumb(erc);
+    })
+  );
+
+  console.log('DONE');
+  process.exit(0);
+};
+
 const main = async () => {
   var myArgs = process.argv.slice(2);
   if (myArgs[0] === 'erc721') await fetchErc721();
-  if (myArgs[0] === 'erc1155') await fetchErc1155(myArgs[1]);
+  else if (myArgs[0] === 'erc1155') await fetchErc1155(myArgs[1]);
   else if (myArgs[0] === 'nftAddress') await fetchNftByAddress(myArgs[1]);
-  // else if(myArgs[0]==='erc1155') ...
+  else if (myArgs[0] === 'imgDown') await reduceImageQuality(myArgs[1]);
   else if (myArgs[0] === 'sellOrder') await fetchSellOrder();
   process.exit(1);
 };
