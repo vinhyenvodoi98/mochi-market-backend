@@ -222,20 +222,34 @@ const fetchSellOrder = async () => {
   );
 };
 
-const reduceImageQuality = async (nftAddress) => {
+const reduceImageQuality = async (nftAddress, tokenId) => {
   var ercImages;
   if (nftAddress === undefined) ercImages = await ERC721Token.find({}, 'image tokenId');
   else {
-    ercImages = await NFT.find(
-      { address: nftAddress },
-      'tags name symbol address onModel'
-    ).populate({
-      path: 'tokens',
-      model: ERC721Token,
-      select: ['tokenId', 'image'],
-    });
+    if (tokenId === undefined) {
+      ercImages = await NFT.find(
+        { address: nftAddress },
+        'tags name symbol address onModel'
+      ).populate({
+        path: 'tokens',
+        model: ERC721Token,
+        select: ['tokenId', 'image'],
+      });
 
-    ercImages = ercImages[0].tokens;
+      ercImages = ercImages[0].tokens;
+    } else {
+      ercImages = await NFT.find(
+        { address: nftAddress },
+        'tags name symbol address onModel'
+      ).populate({
+        path: 'tokens',
+        model: ERC721Token,
+        match: { tokenId },
+        select: ['tokenId', 'image'],
+      });
+
+      ercImages = ercImages[0].tokens;
+    }
   }
 
   await Promise.all(
@@ -253,7 +267,7 @@ const main = async () => {
   if (myArgs[0] === 'erc721') await fetchErc721();
   else if (myArgs[0] === 'erc1155') await fetchErc1155(myArgs[1]);
   else if (myArgs[0] === 'nftAddress') await fetchNftByAddress(myArgs[1]);
-  else if (myArgs[0] === 'imgDown') await reduceImageQuality(myArgs[1]);
+  else if (myArgs[0] === 'imgDown') await reduceImageQuality(myArgs[1], myArgs[2]);
   else if (myArgs[0] === 'sellOrder') await fetchSellOrder();
   process.exit(1);
 };

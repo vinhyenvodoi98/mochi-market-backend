@@ -1,10 +1,14 @@
 # Script Readme
 
-## Fetch all ERC721
-
-```sh
-node script/index.js erc721
-```
+| script                                                | Explain                                          |
+| ----------------------------------------------------- | ------------------------------------------------ |
+| node script/index.js erc721                           | Fetch all ERC721                                 |
+| node script/index.js erc1155 0xc33d69a3...3987bde9    | Fetch ERC1155 by address                         |
+| node script/index.js nftAddress 0xc33d69a3...3987bde9 | Fetch all ERC721 by address                      |
+| node script/index.js imgDown                          | Down quality of all image                        |
+| node script/index.js imgDown 0xc33d69a3...3987bde9    | Down quality of image by nft address             |
+| node script/index.js imgDown 0xc33d69a3...3987bde9 10 | Down quality of image by nft address adn tokenID |
+| node script/index.js sellOrder                        | Fetch all sell Order                             |
 
 # API
 
