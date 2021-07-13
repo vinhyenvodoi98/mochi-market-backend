@@ -17,7 +17,7 @@ router.get('/:address', async (req, res) => {
     }).populate({
       path: 'tokens',
       model: ERC721Token,
-      select: ['tokenId', 'tokenURI', 'name', 'image', 'description'],
+      select: ['tokenId', 'tokenURI', 'thumb', 'name', 'image', 'description'],
     });
 
     tokens = tokens.filter((token) => token.tokens.length > 0);
@@ -87,7 +87,7 @@ router.get('/:address/:tokenId', async (req, res) => {
       path: 'tokens',
       model: ERC721Token,
       match: { tokenId },
-      select: ['tokenId', 'tokenURI', 'name', 'image', 'description'],
+      select: ['tokenId', 'tokenURI', 'thumb', 'name', 'image', 'description'],
     });
     if (!!token && token.tokens.length > 0) return res.json(token.tokens[0]);
     else return res.json(null);
