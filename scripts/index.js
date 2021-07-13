@@ -29,16 +29,18 @@ mongoose.set('useCreateIndex', true);
 
 let updateThumb = async (erc) => {
   return new Promise(async (resolve, reject) => {
-    try {
-      if (erc.image.length > 0 && !erc.thumb) {
-        let thumb = await downQuality(erc.image);
-        await ERC721Token.findOneAndUpdate({ _id: erc._id }, { thumb });
-        console.log('Down quality tokenId :' + erc.tokenId);
+    setTimeout(async () => {
+      try {
+        if (!!erc.image && erc.image.length > 0 && !erc.thumb) {
+          let thumb = await downQuality(erc.image);
+          await ERC721Token.findOneAndUpdate({ _id: erc._id }, { thumb });
+          console.log('Down quality tokenId :' + erc.tokenId);
+        }
+        resolve();
+      } catch (error) {
+        reject();
       }
-      resolve();
-    } catch (error) {
-      reject();
-    }
+    }, 3000);
   });
 };
 
