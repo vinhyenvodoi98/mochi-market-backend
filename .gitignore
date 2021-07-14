@@ -24,3 +24,5 @@ log/
 #.env.*.local
 
 yarn.lock
+Dockerfile
+.dockerignore

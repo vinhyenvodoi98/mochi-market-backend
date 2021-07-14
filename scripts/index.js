@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const axios = require('axios');
 const NFT = require('../models/NFT');
 const ERC721Token = require('../models/ERC721Token');
+const ERC1155Token = require('../models/ERC1155Token');
 const User = require('../models/User');
 const SellOrder = require('../models/SellOrder');
 
@@ -156,7 +157,36 @@ const fetchErc1155 = async (nftAddress) => {
   });
 
   await nft.save();
-  console.log(`Erc1155 name : ${name}`);
+
+  for (let i = 1; ; i++) {
+    let tokenURI;
+    try {
+      tokenURI = await instance.uri(i);
+      if (tokenURI.length === 0) break;
+    } catch (error) {
+      break;
+    }
+    if (tokenURI) {
+      let req = await axios.get(tokenURI);
+
+      let erc1155 = new ERC1155Token({
+        tokenId: i,
+        tokenURI: tokenURI,
+        name: !!req.data.name ? req.data.name : 'Unnamed',
+        image: !!req.data.image ? req.data.image : '',
+        description: !!req.data.description ? req.data.description : '',
+        attributes: !!req.data.attributes ? req.data.attributes : [],
+        nft: nft.id,
+      });
+
+      // save ERC1155
+      await erc1155.save();
+
+      // update NFT
+      await NFT.updateOne({ _id: nft._id }, { $push: { tokens: erc1155._id } });
+      console.log(`Erc1155 name : ${name} tokenId : ${i}`);
+    }
+  }
 };
 
 const fetchErc721 = async () => {
@@ -218,7 +248,7 @@ const fetchSellOrder = async () => {
   );
 };
 
-const reduceImageQuality = async (nftAddress, tokenId) => {
+const reduceImageQuality721 = async (nftAddress, tokenId) => {
   var ercImages;
   if (!nftAddress) ercImages = await ERC721Token.find({}, 'image tokenId');
   else {
@@ -266,12 +296,61 @@ const reduceImageQuality = async (nftAddress, tokenId) => {
   process.exit(0);
 };
 
+const reduceImageQuality1155 = async (nftAddress, tokenId) => {
+  var ercImages;
+  if (!nftAddress) ercImages = await ERC1155Token.find({}, 'image tokenId');
+  else {
+    if (!tokenId) {
+      ercImages = await NFT.find(
+        { address: nftAddress.toLowerCase() },
+        'tags name symbol address onModel'
+      ).populate({
+        path: 'tokens',
+        model: ERC1155Token,
+        select: ['tokenId', 'image'],
+      });
+
+      ercImages = ercImages[0].tokens;
+    } else {
+      ercImages = await NFT.find(
+        { address: nftAddress.toLowerCase() },
+        'tags name symbol address onModel'
+      ).populate({
+        path: 'tokens',
+        model: ERC1155Token,
+        match: { tokenId },
+        select: ['tokenId', 'image'],
+      });
+
+      ercImages = ercImages[0].tokens;
+    }
+  }
+
+  for (let i = 0; i < ercImages.length; i++) {
+    if (
+      !!ercImages[i].image &&
+      ercImages[i].image.length > 0 &&
+      (!ercImages[i].thumb || ercImages[i].thumb.length === 0)
+    ) {
+      let thumb = await updateThumb(ercImages[i], 'gif');
+      if (thumb) {
+        await ERC1155Token.findOneAndUpdate({ _id: ercImages[i]._id }, { thumb });
+        console.log('Down quality tokenId :' + ercImages[i].tokenId);
+      }
+    }
+  }
+
+  console.log('DONE');
+  process.exit(0);
+};
+
 const main = async () => {
   var myArgs = process.argv.slice(2);
   if (myArgs[0] === 'erc721') await fetchErc721();
   else if (myArgs[0] === 'erc1155') await fetchErc1155(myArgs[1]);
   else if (myArgs[0] === 'nftAddress') await fetchNftByAddress(myArgs[1]);
-  else if (myArgs[0] === 'imgDown') await reduceImageQuality(myArgs[1], myArgs[2]);
+  else if (myArgs[0] === 'imgDown721') await reduceImageQuality721(myArgs[1], myArgs[2]);
+  else if (myArgs[0] === 'imgDown1155') await reduceImageQuality1155(myArgs[1], myArgs[2]);
   else if (myArgs[0] === 'sellOrder') await fetchSellOrder();
   process.exit(1);
 };
