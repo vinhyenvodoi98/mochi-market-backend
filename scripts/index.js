@@ -30,14 +30,10 @@ mongoose.set('useCreateIndex', true);
 let updateThumb = async (erc) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!!erc.image && erc.image.length > 0 && !erc.thumb) {
-        let thumb = await downQuality(erc.image);
-        await ERC721Token.findOneAndUpdate({ _id: erc._id }, { thumb });
-        console.log('Down quality tokenId :' + erc.tokenId);
-      }
-      resolve();
+      let thumb = await downQuality(erc.image);
+      resolve(thumb);
     } catch (error) {
-      reject();
+      reject(false);
     }
   });
 };
@@ -252,14 +248,19 @@ const reduceImageQuality = async (nftAddress, tokenId) => {
     }
   }
 
-  await Promise.all(
-    ercImages.map(async (erc) => {
-      if (!!erc.image && erc.image.length > 0 && !erc.thumb) {
-        console.log('token' + erc.tokenId);
-        return await updateThumb(erc);
+  for (let i = 0; i < ercImages.length; i++) {
+    if (
+      !!ercImages[i].image &&
+      ercImages[i].image.length > 0 &&
+      (!ercImages[i].thumb || ercImages[i].thumb.length === 0)
+    ) {
+      let thumb = await updateThumb(ercImages[i]);
+      if (thumb) {
+        await ERC721Token.findOneAndUpdate({ _id: ercImages[i]._id }, { thumb });
+        console.log('Down quality tokenId :' + ercImages[i].tokenId);
       }
-    })
-  );
+    }
+  }
 
   console.log('DONE');
   process.exit(0);
