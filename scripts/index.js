@@ -28,10 +28,10 @@ mongoose.connect(
 );
 mongoose.set('useCreateIndex', true);
 
-let updateThumb = async (erc) => {
+let updateThumb = async (erc, imgType) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let thumb = await downQuality(erc.image);
+      let thumb = await downQuality(erc.image, imgType);
       resolve(thumb);
     } catch (error) {
       reject(false);
