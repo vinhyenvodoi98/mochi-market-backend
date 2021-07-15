@@ -250,7 +250,7 @@ const fetchSellOrder = async () => {
 
 const reduceImageQuality721 = async (nftAddress, tokenId) => {
   var ercImages;
-  if (!nftAddress) ercImages = await ERC721Token.find({}, 'image tokenId');
+  if (!nftAddress) ercImages = await ERC721Token.find({}, 'image tokenId thumb');
   else {
     if (!tokenId) {
       ercImages = await NFT.find(
@@ -259,7 +259,7 @@ const reduceImageQuality721 = async (nftAddress, tokenId) => {
       ).populate({
         path: 'tokens',
         model: ERC721Token,
-        select: ['tokenId', 'image'],
+        select: ['tokenId', 'image', 'thumb'],
       });
 
       ercImages = ercImages[0].tokens;
@@ -271,7 +271,7 @@ const reduceImageQuality721 = async (nftAddress, tokenId) => {
         path: 'tokens',
         model: ERC721Token,
         match: { tokenId },
-        select: ['tokenId', 'image'],
+        select: ['tokenId', 'image', 'thumb'],
       });
 
       ercImages = ercImages[0].tokens;
@@ -307,7 +307,7 @@ const reduceImageQuality1155 = async (nftAddress, tokenId) => {
       ).populate({
         path: 'tokens',
         model: ERC1155Token,
-        select: ['tokenId', 'image'],
+        select: ['tokenId', 'image', 'thumb'],
       });
 
       ercImages = ercImages[0].tokens;
@@ -319,7 +319,7 @@ const reduceImageQuality1155 = async (nftAddress, tokenId) => {
         path: 'tokens',
         model: ERC1155Token,
         match: { tokenId },
-        select: ['tokenId', 'image'],
+        select: ['tokenId', 'image', 'thumb'],
       });
 
       ercImages = ercImages[0].tokens;
