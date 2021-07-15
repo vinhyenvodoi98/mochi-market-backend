@@ -364,35 +364,27 @@ const updateUndefinedImage = async (nftAddress) => {
     undefinedImg = await ERC721Token.find({ name: 'Unnamed' }, 'tokenURI name tokenId');
   }
 
-  const updateERCDetail = async (erc) => {
-    return new Promise(async (resolve, reject) => {
-      let req = await axios.get(erc.tokenURI);
-      let thumb = '';
-      if (!!req.data.image) thumb = await updateThumb(req.data.image);
+  for (let i = 0; i < undefinedImg.length; i++) {
+    let req = await axios.get(undefinedImg[i].tokenURI);
+    let thumb = '';
+    if (!!req.data.image) thumb = await updateThumb(req.data.image);
 
-      if (!!req.data.name && req.data.name !== 'Unnamed') {
-        await ERC721Token.updateOne(
-          { _id: erc._id },
-          {
-            name: !!req.data.name ? req.data.name : 'Unnamed',
-            image: !!req.data.image ? req.data.image : '',
-            description: !!req.data.description ? req.data.description : '',
-            attributes: !!req.data.attributes ? req.data.attributes : [],
-            thumb,
-          }
-        );
-        console.log('nft : ' + erc.name + ': id : ' + erc.tokenId);
-      }
+    if (!!req.data.name && req.data.name !== 'Unnamed') {
+      console.log('i : ' + i);
 
-      resolve();
-    });
-  };
-
-  await Promise.all(
-    undefinedImg.map(async (erc) => {
-      return await updateERCDetail(erc);
-    })
-  );
+      await ERC721Token.updateOne(
+        { _id: undefinedImg[i]._id },
+        {
+          name: !!req.data.name ? req.data.name : 'Unnamed',
+          image: !!req.data.image ? req.data.image : '',
+          description: !!req.data.description ? req.data.description : '',
+          attributes: !!req.data.attributes ? req.data.attributes : [],
+          thumb,
+        }
+      );
+      console.log('nft : ' + undefinedImg[i].name + ': id : ' + undefinedImg[i].tokenId);
+    }
+  }
 };
 
 const main = async () => {
