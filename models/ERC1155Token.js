@@ -15,9 +15,13 @@ const ERC1155TokenSchema = new Schema(
     image: {
       type: String,
     },
+    thumb: {
+      type: String,
+    },
     description: {
       type: String,
     },
+    attributes: [],
     amount: {
       type: Number,
     },
