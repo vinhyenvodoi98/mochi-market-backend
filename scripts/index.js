@@ -28,10 +28,10 @@ mongoose.connect(
 );
 mongoose.set('useCreateIndex', true);
 
-let updateThumb = async (erc, imgType) => {
+let updateThumb = async (image, imgType) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let thumb = await downQuality(erc.image, imgType);
+      let thumb = await downQuality(image, imgType);
       resolve(thumb);
     } catch (error) {
       reject(false);
@@ -284,7 +284,7 @@ const reduceImageQuality721 = async (nftAddress, tokenId) => {
       ercImages[i].image.length > 0 &&
       (!ercImages[i].thumb || ercImages[i].thumb.length === 0)
     ) {
-      let thumb = await updateThumb(ercImages[i]);
+      let thumb = await updateThumb(ercImages[i].image);
       if (thumb) {
         await ERC721Token.findOneAndUpdate({ _id: ercImages[i]._id }, { thumb });
         console.log('Down quality tokenId :' + ercImages[i].tokenId);
@@ -332,7 +332,7 @@ const reduceImageQuality1155 = async (nftAddress, tokenId) => {
       ercImages[i].image.length > 0 &&
       (!ercImages[i].thumb || ercImages[i].thumb.length === 0)
     ) {
-      let thumb = await updateThumb(ercImages[i], 'gif');
+      let thumb = await updateThumb(ercImages[i].image, 'gif');
       if (thumb) {
         await ERC1155Token.findOneAndUpdate({ _id: ercImages[i]._id }, { thumb });
         console.log('Down quality tokenId :' + ercImages[i].tokenId);
@@ -344,6 +344,57 @@ const reduceImageQuality1155 = async (nftAddress, tokenId) => {
   process.exit(0);
 };
 
+// update the nft undefined
+const updateUndefinedImage = async (nftAddress) => {
+  // if not enter nftAddress
+  let undefinedImg;
+  if (!!nftAddress) {
+    undefinedImg = await NFT.find(
+      { address: nftAddress.toLowerCase() },
+      'address onModel'
+    ).populate({
+      path: 'tokens',
+      model: ERC721Token,
+      match: { name: 'Unnamed' },
+      select: ['tokenURI', 'name', 'tokenId'],
+    });
+
+    undefinedImg = undefinedImg[0].tokens;
+  } else {
+    undefinedImg = await ERC721Token.find({ name: 'Unnamed' }, 'tokenURI name tokenId');
+  }
+
+  const updateERCDetail = async (erc) => {
+    return new Promise(async (resolve, reject) => {
+      let req = await axios.get(erc.tokenURI);
+      let thumb = '';
+      if (!!req.data.image) thumb = await updateThumb(req.data.image);
+
+      if (!!req.data.name && req.data.name !== 'Unnamed') {
+        await ERC721Token.updateOne(
+          { _id: erc._id },
+          {
+            name: !!req.data.name ? req.data.name : 'Unnamed',
+            image: !!req.data.image ? req.data.image : '',
+            description: !!req.data.description ? req.data.description : '',
+            attributes: !!req.data.attributes ? req.data.attributes : [],
+            thumb,
+          }
+        );
+        console.log('nft : ' + erc.name + ': id : ' + erc.tokenId);
+      }
+
+      resolve();
+    });
+  };
+
+  await Promise.all(
+    undefinedImg.map(async (erc) => {
+      return await updateERCDetail(erc);
+    })
+  );
+};
+
 const main = async () => {
   var myArgs = process.argv.slice(2);
   if (myArgs[0] === 'erc721') await fetchErc721();
@@ -352,6 +403,7 @@ const main = async () => {
   else if (myArgs[0] === 'imgDown721') await reduceImageQuality721(myArgs[1], myArgs[2]);
   else if (myArgs[0] === 'imgDown1155') await reduceImageQuality1155(myArgs[1], myArgs[2]);
   else if (myArgs[0] === 'sellOrder') await fetchSellOrder();
+  else if (myArgs[0] === 'updateUndefined') await updateUndefinedImage(myArgs[1]);
   process.exit(1);
 };
 
