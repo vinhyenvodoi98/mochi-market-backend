@@ -8,6 +8,7 @@ const { default: axios } = require('axios');
 const User = require('../models/User');
 const { getContractAddress } = require('../utils/getContractAddress');
 const { utils } = require('ethers');
+const { downQuality } = require('../utils/reduceImage');
 
 const OldEventStream = async () => {
   let nfts = await NFT.find({}, 'address');
@@ -122,14 +123,20 @@ const openListenERC721Event = (nftAddress) => {
         if (tokenURI) {
           try {
             let req = await axios.get(tokenURI);
+            let thumb = '';
+            if (!!req.data.image) {
+              thumb = await downQuality(req.data.image);
+            }
 
             let erc721 = new ERC721Token({
               tokenId,
               tokenURI: tokenURI,
               name: !!req.data.name ? req.data.name : 'Unnamed',
               image: !!req.data.image ? req.data.image : '',
+              attributes: !!req.data.attributes ? req.data.attributes : [],
               description: !!req.data.description ? req.data.description : '',
               nft: recordedNFT._id,
+              thumb,
             });
 
             // save ERC721
