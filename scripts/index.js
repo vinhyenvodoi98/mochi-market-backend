@@ -298,7 +298,7 @@ const reduceImageQuality721 = async (nftAddress, tokenId) => {
 
 const reduceImageQuality1155 = async (nftAddress, tokenId) => {
   var ercImages;
-  if (!nftAddress) ercImages = await ERC1155Token.find({}, 'image tokenId');
+  if (!nftAddress) ercImages = await ERC1155Token.find({}, 'image tokenId thumb');
   else {
     if (!tokenId) {
       ercImages = await NFT.find(
