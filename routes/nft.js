@@ -81,13 +81,6 @@ router.get('/:address/:tokenId', async (req, res) => {
     let token = await NFT.findOne({ address }, 'tags name symbol address onModel').populate([
       {
         path: 'tokens',
-        model: ERC721Token,
-        match: { tokenId },
-        select: ['tokenId', 'attributes', 'tokenURI', 'thumb', 'name', 'image', 'description'],
-      },
-      {
-        path: 'tokens',
-        model: ERC1155Token,
         match: { tokenId },
         select: ['tokenId', 'attributes', 'tokenURI', 'thumb', 'name', 'image', 'description'],
       },
