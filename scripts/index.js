@@ -414,7 +414,7 @@ const main = async () => {
   else if (myArgs[0] === 'imgDown1155') await reduceImageQuality1155(myArgs[1], myArgs[2]);
   else if (myArgs[0] === 'sellOrder') await fetchSellOrder();
   else if (myArgs[0] === 'updateUndefined') await updateUndefinedImage(myArgs[1]);
-  process.exit(1);
+  else process.exit(0);
 };
 
 main();
