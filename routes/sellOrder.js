@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const SellOrder = require('../models/SellOrder');
 const ERC721Token = require('../models/ERC721Token');
+const ERC1155Token = require('../models/ERC1155Token');
 const NFT = require('../models/NFT');
 const { utils } = require('ethers');
 
@@ -28,7 +29,6 @@ router.get('/:filter', async (req, res) => {
             'tags name symbol address'
           ).populate({
             path: 'tokens',
-            model: ERC721Token,
             match: { tokenId: order.tokenId },
             select: ['tokenId', 'tokenURI', 'name', 'image', 'description'],
           });
@@ -67,27 +67,28 @@ router.get('/:filter', async (req, res) => {
             'tags name symbol address'
           ).populate({
             path: 'tokens',
-            model: ERC721Token,
             match: { tokenId: order.tokenId },
             select: ['tokenId', 'tokenURI', 'name', 'image', 'description'],
           });
 
-          let newSellOrder = {
-            index: nft.tokens[0].tokenId,
-            amount: order.amount,
-            sellId: order.sellId.toString(),
-            soldAmount: order.soldAmount,
-            seller: order.seller,
-            price: utils.parseEther(order.price.toString()).toString(),
-            tokenPayment: order.token,
-            collections: nft.name,
-            symbolCollections: nft.symbol,
-            addressToken: nft.address,
-            tokenURI: nft.tokens[0].tokenURI,
-            sortIndex,
-          };
-          order += 1;
-          return newSellOrder;
+          if (nft.tokens.length > 0) {
+            let newSellOrder = {
+              index: nft.tokens[0].tokenId,
+              amount: order.amount,
+              sellId: order.sellId.toString(),
+              soldAmount: order.soldAmount,
+              seller: order.seller,
+              price: utils.parseEther(order.price.toString()).toString(),
+              tokenPayment: order.token,
+              collections: nft.name,
+              symbolCollections: nft.symbol,
+              addressToken: nft.address,
+              tokenURI: nft.tokens[0].tokenURI,
+              sortIndex,
+            };
+            order += 1;
+            return newSellOrder;
+          }
         })
       );
     } else if (filter === 'formatByNft') {
@@ -111,26 +112,27 @@ router.get('/:filter', async (req, res) => {
             'tags name symbol address'
           ).populate({
             path: 'tokens',
-            model: ERC721Token,
             match: { tokenId: order.tokenId },
             select: ['tokenId', 'tokenURI', 'name', 'image', 'description'],
           });
 
-          let newSellOrder = {
-            index: order.tokenId,
-            amount: order.amount,
-            soldAmount: order.soldAmount,
-            seller: order.seller,
-            price: utils.parseEther(order.price.toString()).toString(),
-            tokenPayment: order.token,
-            collections: nft.name,
-            symbolCollections: nft.symbol,
-            addressToken: nft.address,
-            tokenURI: nft.tokens[0].tokenURI,
-            sortIndex,
-          };
-          order += 1;
-          return newSellOrder;
+          if (nft.tokens.length > 0) {
+            let newSellOrder = {
+              index: order.tokenId,
+              amount: order.amount,
+              soldAmount: order.soldAmount,
+              seller: order.seller,
+              price: utils.parseEther(order.price.toString()).toString(),
+              tokenPayment: order.token,
+              collections: nft.name,
+              symbolCollections: nft.symbol,
+              addressToken: nft.address,
+              tokenURI: nft.tokens[0].tokenURI,
+              sortIndex,
+            };
+            order += 1;
+            return newSellOrder;
+          }
         })
       );
 
@@ -169,21 +171,23 @@ router.get('/:filter', async (req, res) => {
         orders.map(async (order) => {
           let nft = await NFT.findOne({ _id: order.nftAddress }, 'address');
 
-          let newSellOrder = {
-            sellId: order.sellId.toString(),
-            amount: order.amount,
-            sellTime: order.sellTime,
-            buyers: order.buyers,
-            buyTimes: order.buyTimes,
-            tokenId: order.tokenId.toString(),
-            soldAmount: order.soldAmount,
-            seller: order.seller,
-            price: utils.parseEther(order.price.toString()).toString(),
-            token: order.token,
-            nftAddress: nft.address,
-          };
+          if (nft.tokens.length > 0) {
+            let newSellOrder = {
+              sellId: order.sellId.toString(),
+              amount: order.amount,
+              sellTime: order.sellTime,
+              buyers: order.buyers,
+              buyTimes: order.buyTimes,
+              tokenId: order.tokenId.toString(),
+              soldAmount: order.soldAmount,
+              seller: order.seller,
+              price: utils.parseEther(order.price.toString()).toString(),
+              token: order.token,
+              nftAddress: nft.address,
+            };
 
-          return newSellOrder;
+            return newSellOrder;
+          }
         })
       );
     } else if (filter === 'sortByPrice') {
@@ -203,25 +207,28 @@ router.get('/:filter', async (req, res) => {
         orders.map(async (order) => {
           let nft = await NFT.findOne({ _id: order.nftAddress }, 'address');
 
-          let newSellOrder = {
-            sellId: order.sellId.toString(),
-            amount: order.amount,
-            sellTime: order.sellTime,
-            buyers: order.buyers,
-            buyTimes: order.buyTimes,
-            tokenId: order.tokenId.toString(),
-            soldAmount: order.soldAmount,
-            seller: order.seller,
-            price: utils.parseEther(order.price.toString()).toString(),
-            token: order.token,
-            nftAddress: nft.address,
-          };
+          if (nft.tokens.length > 0) {
+            let newSellOrder = {
+              sellId: order.sellId.toString(),
+              amount: order.amount,
+              sellTime: order.sellTime,
+              buyers: order.buyers,
+              buyTimes: order.buyTimes,
+              tokenId: order.tokenId.toString(),
+              soldAmount: order.soldAmount,
+              seller: order.seller,
+              price: utils.parseEther(order.price.toString()).toString(),
+              token: order.token,
+              nftAddress: nft.address,
+            };
 
-          return newSellOrder;
+            return newSellOrder;
+          }
         })
       );
     }
 
+    sellOrders = sellOrders.filter((order) => order != null);
     return res.json(sellOrders);
   } catch (error) {
     return res.status(500).end();
