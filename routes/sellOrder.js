@@ -26,11 +26,11 @@ router.get('/:filter', async (req, res) => {
         orders.map(async (order) => {
           let nft = await NFT.findOne(
             { _id: order.nftAddress },
-            'tags name symbol address'
+            'tags name symbol address onModel'
           ).populate({
             path: 'tokens',
             match: { tokenId: order.tokenId },
-            select: ['tokenId', 'tokenURI', 'name', 'image', 'description'],
+            select: ['tokenId', 'attributes', 'tokenURI', 'thumb', 'name', 'image', 'description'],
           });
 
           let newSellOrder = {
@@ -64,11 +64,11 @@ router.get('/:filter', async (req, res) => {
         orders.map(async (order) => {
           let nft = await NFT.findOne(
             { _id: order.nftAddress },
-            'tags name symbol address'
+            'tags name symbol address onModel'
           ).populate({
             path: 'tokens',
             match: { tokenId: order.tokenId },
-            select: ['tokenId', 'tokenURI', 'name', 'image', 'description'],
+            select: ['tokenId', 'attributes', 'tokenURI', 'thumb', 'name', 'image', 'description'],
           });
 
           if (nft.tokens.length > 0) {
@@ -84,6 +84,7 @@ router.get('/:filter', async (req, res) => {
               symbolCollections: nft.symbol,
               addressToken: nft.address,
               tokenURI: nft.tokens[0].tokenURI,
+              attributes: nft.tokens[0].attributes,
               sortIndex,
             };
             order += 1;
@@ -109,11 +110,11 @@ router.get('/:filter', async (req, res) => {
         orders.map(async (order) => {
           let nft = await NFT.findOne(
             { _id: order.nftAddress },
-            'tags name symbol address'
+            'tags name symbol address onModel'
           ).populate({
             path: 'tokens',
             match: { tokenId: order.tokenId },
-            select: ['tokenId', 'tokenURI', 'name', 'image', 'description'],
+            select: ['tokenId', 'attributes', 'tokenURI', 'thumb', 'name', 'image', 'description'],
           });
 
           if (nft.tokens.length > 0) {
@@ -128,6 +129,7 @@ router.get('/:filter', async (req, res) => {
               symbolCollections: nft.symbol,
               addressToken: nft.address,
               tokenURI: nft.tokens[0].tokenURI,
+              attributes: nft.tokens[0].attributes,
               sortIndex,
             };
             order += 1;
@@ -255,14 +257,14 @@ router.get('/user/:address', async (req, res) => {
     let sortIndex = 0;
     sellOrders = await Promise.all(
       orders.map(async (order) => {
-        let nft = await NFT.findOne({ _id: order.nftAddress }, 'tags name symbol address').populate(
-          {
-            path: 'tokens',
-            model: ERC721Token,
-            match: { tokenId: order.tokenId },
-            select: ['tokenId', 'tokenURI', 'name', 'image', 'description'],
-          }
-        );
+        let nft = await NFT.findOne(
+          { _id: order.nftAddress },
+          'tags name symbol address onModel'
+        ).populate({
+          path: 'tokens',
+          match: { tokenId: order.tokenId },
+          select: ['tokenId', 'attributes', 'tokenURI', 'thumb', 'name', 'image', 'description'],
+        });
 
         let newSellOrder = {
           index: order.tokenId,
