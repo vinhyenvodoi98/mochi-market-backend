@@ -213,31 +213,37 @@ const fetchNftByAddress = async (nftAddress) => {
 const fetchSellOrder = async () => {
   const sellOrderList = getSellOrderListInstance();
   let availableSellOrderIdList = await sellOrderList.getAvailableSellOrdersIdList();
-  let availableSellOrders = await sellOrderList.getSellOrdersByIdList(
+  let availableSellOrders721 = await sellOrderList.getSellOrdersByIdList(
     availableSellOrderIdList.resultERC721
   );
+  let availableSellOrders1155 = await sellOrderList.getSellOrdersByIdList(
+    availableSellOrderIdList.resultERC1155
+  );
+
+  let availableSellOrders = availableSellOrders721.concat(availableSellOrders1155);
 
   const saveSellOrderList = (availableSellOrder) => {
-    return new Promise(async (resolve) => {
+    return new Promise(async (resolve, reject) => {
       let nft = await NFT.findOne({ address: availableSellOrder.nftAddress.toLowerCase() });
-
-      let sellOrder = new SellOrder({
-        sellId: availableSellOrder.sellId.toString(),
-        nftAddress: nft._id,
-        tokenId: parseInt(availableSellOrder.tokenId.toString()),
-        amount: availableSellOrder.amount.toString(),
-        soldAmount: availableSellOrder.soldAmount.toString(),
-        seller: availableSellOrder.seller.toLowerCase(),
-        price: parseFloat(utils.formatEther(availableSellOrder.price.toString())),
-        token: availableSellOrder.token.toLowerCase(),
-        isActive: availableSellOrder.isActive,
-        sellTime: availableSellOrder.sellTime.toString(),
-        buyers: availableSellOrder.buyers,
-        buyTimes: availableSellOrder.buyTimes,
-      });
-      console.log('sellOrderId: ' + sellOrder.sellId);
-      let sellOrderId = await sellOrder.save();
-      resolve(sellOrderId);
+      if (!!nft) {
+        let sellOrder = new SellOrder({
+          sellId: availableSellOrder.sellId.toString(),
+          nftAddress: nft._id,
+          tokenId: parseInt(availableSellOrder.tokenId.toString()),
+          amount: availableSellOrder.amount.toString(),
+          soldAmount: availableSellOrder.soldAmount.toString(),
+          seller: availableSellOrder.seller.toLowerCase(),
+          price: parseFloat(utils.formatEther(availableSellOrder.price.toString())),
+          token: availableSellOrder.token.toLowerCase(),
+          isActive: availableSellOrder.isActive,
+          sellTime: availableSellOrder.sellTime.toString(),
+          buyers: availableSellOrder.buyers,
+          buyTimes: availableSellOrder.buyTimes,
+        });
+        console.log('sellOrderId: ' + sellOrder.sellId);
+        let sellOrderId = await sellOrder.save();
+        resolve(sellOrderId);
+      } else reject('');
     });
   };
 
