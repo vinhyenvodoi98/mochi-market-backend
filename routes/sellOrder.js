@@ -47,49 +47,31 @@ router.get('/:filter', async (req, res) => {
         })
       );
     } else if (filter === 'all') {
-      let orders = await SellOrder.find(
-        { status: 'Create' },
-        'sellId nftAddress tokenId amount soldAmount seller price token sellTime ',
-        {
-          skip,
-          limit,
-          sort: {
-            sellTime: -1,
-          },
-        }
-      );
+      let orders = await SellOrder.aggregate([
+        { $match: { status: 'Create' } },
+        { $sort: { sellTime: -1 } },
+        { $limit: limit },
+        { $skip: skip },
+        { $project: { _id: 0, createdAt: 0, updatedAt: 0, onModel: 0 } },
+      ]);
 
-      let sortIndex = 0;
       sellOrders = await Promise.all(
         orders.map(async (order) => {
-          let nft = await NFT.findOne(
-            { _id: order.nftAddress },
-            'tags name symbol address onModel'
-          ).populate({
-            path: 'tokens',
-            match: { tokenId: order.tokenId },
-            select: ['tokenId', 'attributes', 'tokenURI', 'thumb', 'name', 'image', 'description'],
-          });
+          let newSellOrder = {
+            sellId: order.sellId.toString(),
+            amount: order.amount,
+            sellTime: order.sellTime,
+            buyers: order.buyers,
+            buyTimes: order.buyTimes,
+            index: order.tokenId.toString(),
+            soldAmount: order.soldAmount,
+            seller: order.seller,
+            price: utils.parseEther(order.price.toString()).toString(),
+            tokenPayment: order.token,
+            addressToken: order.address,
+          };
 
-          if (nft.tokens.length > 0) {
-            let newSellOrder = {
-              index: nft.tokens[0].tokenId,
-              amount: order.amount,
-              sellId: order.sellId.toString(),
-              soldAmount: order.soldAmount,
-              seller: order.seller,
-              price: utils.parseEther(order.price.toString()).toString(),
-              tokenPayment: order.token,
-              collections: nft.name,
-              symbolCollections: nft.symbol,
-              addressToken: nft.address,
-              tokenURI: nft.tokens[0].tokenURI,
-              attributes: nft.tokens[0].attributes,
-              sortIndex,
-            };
-            order += 1;
-            return newSellOrder;
-          }
+          return newSellOrder;
         })
       );
     } else if (filter === 'formatByNft') {
@@ -177,7 +159,7 @@ router.get('/:filter', async (req, res) => {
             soldAmount: order.soldAmount,
             seller: order.seller,
             price: utils.parseEther(order.price.toString()).toString(),
-            token: order.token,
+            tokenPayment: order.token,
             addressToken: order.address,
           };
 
@@ -205,7 +187,7 @@ router.get('/:filter', async (req, res) => {
             soldAmount: order.soldAmount,
             seller: order.seller,
             price: utils.parseEther(order.price.toString()).toString(),
-            token: order.token,
+            tokenPayment: order.token,
             addressToken: order.address,
           };
 
