@@ -173,12 +173,12 @@ router.get('/:filter', async (req, res) => {
             sellTime: order.sellTime,
             buyers: order.buyers,
             buyTimes: order.buyTimes,
-            tokenId: order.tokenId.toString(),
+            index: order.tokenId.toString(),
             soldAmount: order.soldAmount,
             seller: order.seller,
             price: utils.parseEther(order.price.toString()).toString(),
             token: order.token,
-            nftAddress: order.address,
+            addressToken: order.address,
           };
 
           return newSellOrder;
@@ -201,12 +201,12 @@ router.get('/:filter', async (req, res) => {
             sellTime: order.sellTime,
             buyers: order.buyers,
             buyTimes: order.buyTimes,
-            tokenId: order.tokenId.toString(),
+            index: order.tokenId.toString(),
             soldAmount: order.soldAmount,
             seller: order.seller,
             price: utils.parseEther(order.price.toString()).toString(),
             token: order.token,
-            nftAddress: order.address,
+            addressToken: order.address,
           };
 
           return newSellOrder;
