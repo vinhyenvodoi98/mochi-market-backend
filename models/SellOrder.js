@@ -8,6 +8,12 @@ const SellOrderSchema = new Schema(
       required: true,
     },
     nftAddress: { type: Schema.Types.ObjectId, ref: 'NFT' },
+    address: { type: String },
+    onModel: {
+      type: String,
+      required: true,
+      enum: ['ERC721Token', 'ERC1155Token'],
+    },
     tokenId: {
       type: Number,
       required: true,
@@ -33,7 +39,7 @@ const SellOrderSchema = new Schema(
       required: true,
     },
     sellTime: {
-      type: String,
+      type: Number,
     },
     buyers: [],
     buyTimes: [],
