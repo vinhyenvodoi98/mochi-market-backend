@@ -212,6 +212,7 @@ const fetchNftByAddress = async (nftAddress) => {
 
 const fetchSellOrder = async () => {
   const sellOrderList = getSellOrderListInstance();
+
   let availableSellOrderIdList = await sellOrderList.getAvailableSellOrdersIdList();
   let availableSellOrders721 = await sellOrderList.getSellOrdersByIdList(
     availableSellOrderIdList.resultERC721
@@ -224,11 +225,16 @@ const fetchSellOrder = async () => {
 
   const saveSellOrderList = (availableSellOrder) => {
     return new Promise(async (resolve, reject) => {
-      let nft = await NFT.findOne({ address: availableSellOrder.nftAddress.toLowerCase() });
+      let nft = await NFT.findOne(
+        { address: availableSellOrder.nftAddress.toLowerCase() },
+        'onModel'
+      );
       if (!!nft) {
         let sellOrder = new SellOrder({
           sellId: availableSellOrder.sellId.toString(),
           nftAddress: nft._id,
+          address: availableSellOrder.nftAddress.toLowerCase(),
+          onModel: nft.onModel.toString(),
           tokenId: parseInt(availableSellOrder.tokenId.toString()),
           amount: availableSellOrder.amount.toString(),
           soldAmount: availableSellOrder.soldAmount.toString(),
@@ -236,7 +242,7 @@ const fetchSellOrder = async () => {
           price: parseFloat(utils.formatEther(availableSellOrder.price.toString())),
           token: availableSellOrder.token.toLowerCase(),
           isActive: availableSellOrder.isActive,
-          sellTime: availableSellOrder.sellTime.toString(),
+          sellTime: parseInt(availableSellOrder.sellTime.toString()),
           buyers: availableSellOrder.buyers,
           buyTimes: availableSellOrder.buyTimes,
         });

@@ -43,10 +43,13 @@ const EventStream = async () => {
           let sellOrder = new SellOrder({
             sellId: sellId.toString(),
             nftAddress: nft._id,
+            address: nftAddress.toLowerCase(),
+            onModel: nft.onModel,
             tokenId: parseInt(tokenId.toString()),
             seller: seller.toLowerCase(),
             price: parseFloat(utils.formatEther(price.toString())),
             token: token.toLowerCase(),
+            sellTime: (Date.now() / 1000) | 0,
           });
 
           await sellOrder.save();

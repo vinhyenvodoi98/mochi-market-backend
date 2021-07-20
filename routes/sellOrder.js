@@ -54,7 +54,7 @@ router.get('/:filter', async (req, res) => {
           skip,
           limit,
           sort: {
-            _id: -1,
+            sellTime: -1,
           },
         }
       );
@@ -100,7 +100,7 @@ router.get('/:filter', async (req, res) => {
           skip,
           limit,
           sort: {
-            _id: -1,
+            sellTime: -1,
           },
         }
       );
@@ -157,22 +157,13 @@ router.get('/:filter', async (req, res) => {
         sellOrders.push(objOrder[key]);
       }
     } else if (filter === 'availableSellOrderERC721') {
-      let orders = await SellOrder.find(
-        { status: 'Create' },
-        'sellId nftAddress tokenId amount soldAmount seller price token isActive sellTime buyers buyTimes',
-        {
-          skip,
-          limit,
-          sort: {
-            _id: -1,
-          },
-        }
-      ).populate({
-        path: 'nftAddress',
-        model: NFT,
-        match: { onModel: 'ERC721Token' },
-        select: ['address'],
-      });
+      let orders = await SellOrder.aggregate([
+        { $match: { status: 'Create', onModel: 'ERC721Token' } },
+        { $sort: { sellTime: -1 } },
+        { $limit: limit },
+        { $skip: skip },
+        { $project: { _id: 0, createdAt: 0, updatedAt: 0, onModel: 0 } },
+      ]);
 
       sellOrders = await Promise.all(
         orders.map(async (order) => {
@@ -187,29 +178,20 @@ router.get('/:filter', async (req, res) => {
             seller: order.seller,
             price: utils.parseEther(order.price.toString()).toString(),
             token: order.token,
-            nftAddress: order.nftAddress.address,
+            nftAddress: order.address,
           };
 
           return newSellOrder;
         })
       );
     } else if (filter === 'availableSellOrderERC1155') {
-      let orders = await SellOrder.find(
-        { status: 'Create' },
-        'sellId nftAddress tokenId amount soldAmount seller price token isActive sellTime buyers buyTimes',
-        {
-          skip,
-          limit,
-          sort: {
-            _id: -1,
-          },
-        }
-      ).populate({
-        path: 'nftAddress',
-        model: NFT,
-        match: { onModel: 'ERC1155Token' },
-        select: ['address'],
-      });
+      let orders = await SellOrder.aggregate([
+        { $match: { status: 'Create', onModel: 'ERC1155Token' } },
+        { $sort: { sellTime: -1 } },
+        { $limit: limit },
+        { $skip: skip },
+        { $project: { _id: 0, createdAt: 0, updatedAt: 0, onModel: 0 } },
+      ]);
 
       sellOrders = await Promise.all(
         orders.map(async (order) => {
@@ -224,7 +206,7 @@ router.get('/:filter', async (req, res) => {
             seller: order.seller,
             price: utils.parseEther(order.price.toString()).toString(),
             token: order.token,
-            nftAddress: order.nftAddress.address,
+            nftAddress: order.address,
           };
 
           return newSellOrder;
@@ -269,7 +251,7 @@ router.get('/:filter', async (req, res) => {
     sellOrders = sellOrders.filter((order) => order != null);
     return res.json(sellOrders);
   } catch (error) {
-    return res.status(500).end();
+    return res.status(500).json(error).end();
   }
 });
 
