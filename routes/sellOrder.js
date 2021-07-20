@@ -191,6 +191,44 @@ router.get('/:filter', async (req, res) => {
           }
         })
       );
+    } else if (filter === 'availableSellOrderERC1155') {
+      let orders = await SellOrder.find(
+        { status: 'Create' },
+        'sellId nftAddress tokenId amount soldAmount seller price token isActive sellTime buyers buyTimes',
+        {
+          skip,
+          limit,
+          sort: {
+            _id: -1,
+          },
+        }
+      );
+
+      sellOrders = await Promise.all(
+        orders.map(async (order) => {
+          let nft = await NFT.findOne(
+            { _id: order.nftAddress, onModel: 'ERC1155Token' },
+            'address'
+          );
+          if (!!nft) {
+            let newSellOrder = {
+              sellId: order.sellId.toString(),
+              amount: order.amount,
+              sellTime: order.sellTime,
+              buyers: order.buyers,
+              buyTimes: order.buyTimes,
+              tokenId: order.tokenId.toString(),
+              soldAmount: order.soldAmount,
+              seller: order.seller,
+              price: utils.parseEther(order.price.toString()).toString(),
+              token: order.token,
+              nftAddress: nft.address,
+            };
+
+            return newSellOrder;
+          }
+        })
+      );
     } else if (filter === 'sortByPrice') {
       let orders = await SellOrder.find(
         { status: 'Create' },
