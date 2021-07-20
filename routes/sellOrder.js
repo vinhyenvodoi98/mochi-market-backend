@@ -167,28 +167,30 @@ router.get('/:filter', async (req, res) => {
             _id: -1,
           },
         }
-      );
+      ).populate({
+        path: 'nftAddress',
+        model: NFT,
+        match: { onModel: 'ERC721Token' },
+        select: ['address'],
+      });
 
       sellOrders = await Promise.all(
         orders.map(async (order) => {
-          let nft = await NFT.findOne({ _id: order.nftAddress, onModel: 'ERC721Token' }, 'address');
-          if (!!nft) {
-            let newSellOrder = {
-              sellId: order.sellId.toString(),
-              amount: order.amount,
-              sellTime: order.sellTime,
-              buyers: order.buyers,
-              buyTimes: order.buyTimes,
-              tokenId: order.tokenId.toString(),
-              soldAmount: order.soldAmount,
-              seller: order.seller,
-              price: utils.parseEther(order.price.toString()).toString(),
-              token: order.token,
-              nftAddress: nft.address,
-            };
+          let newSellOrder = {
+            sellId: order.sellId.toString(),
+            amount: order.amount,
+            sellTime: order.sellTime,
+            buyers: order.buyers,
+            buyTimes: order.buyTimes,
+            tokenId: order.tokenId.toString(),
+            soldAmount: order.soldAmount,
+            seller: order.seller,
+            price: utils.parseEther(order.price.toString()).toString(),
+            token: order.token,
+            nftAddress: order.nftAddress.address,
+          };
 
-            return newSellOrder;
-          }
+          return newSellOrder;
         })
       );
     } else if (filter === 'availableSellOrderERC1155') {
@@ -202,31 +204,30 @@ router.get('/:filter', async (req, res) => {
             _id: -1,
           },
         }
-      );
+      ).populate({
+        path: 'nftAddress',
+        model: NFT,
+        match: { onModel: 'ERC1155Token' },
+        select: ['address'],
+      });
 
       sellOrders = await Promise.all(
         orders.map(async (order) => {
-          let nft = await NFT.findOne(
-            { _id: order.nftAddress, onModel: 'ERC1155Token' },
-            'address'
-          );
-          if (!!nft) {
-            let newSellOrder = {
-              sellId: order.sellId.toString(),
-              amount: order.amount,
-              sellTime: order.sellTime,
-              buyers: order.buyers,
-              buyTimes: order.buyTimes,
-              tokenId: order.tokenId.toString(),
-              soldAmount: order.soldAmount,
-              seller: order.seller,
-              price: utils.parseEther(order.price.toString()).toString(),
-              token: order.token,
-              nftAddress: nft.address,
-            };
+          let newSellOrder = {
+            sellId: order.sellId.toString(),
+            amount: order.amount,
+            sellTime: order.sellTime,
+            buyers: order.buyers,
+            buyTimes: order.buyTimes,
+            tokenId: order.tokenId.toString(),
+            soldAmount: order.soldAmount,
+            seller: order.seller,
+            price: utils.parseEther(order.price.toString()).toString(),
+            token: order.token,
+            nftAddress: order.nftAddress.address,
+          };
 
-            return newSellOrder;
-          }
+          return newSellOrder;
         })
       );
     } else if (filter === 'sortByPrice') {
