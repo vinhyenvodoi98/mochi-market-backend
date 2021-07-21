@@ -52,7 +52,7 @@ router.get('/:filter', async (req, res) => {
         { $sort: { sellTime: -1 } },
         { $limit: limit },
         { $skip: skip },
-        { $project: { _id: 0, createdAt: 0, updatedAt: 0, onModel: 0 } },
+        { $project: { _id: 0, createdAt: 0, updatedAt: 0 } },
       ]);
 
       sellOrders = await Promise.all(
@@ -69,6 +69,7 @@ router.get('/:filter', async (req, res) => {
             price: utils.parseEther(order.price.toString()).toString(),
             tokenPayment: order.token,
             addressToken: order.address,
+            is1155: order.onModel === 'ERC1155Token' ? true : false,
           };
 
           return newSellOrder;
