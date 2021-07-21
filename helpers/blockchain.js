@@ -7,8 +7,19 @@ const { getNftListInstance } = require('../utils/getContractInstance');
 
 const getAcceptedNfts = async () => {
   const nftList = getNftListInstance();
+
   let acceptedNftsAddress = await nftList.getAcceptedNFTs();
-  return acceptedNftsAddress;
+  let address = { erc721: [], erc1155: [] };
+  await Promise.all(
+    acceptedNftsAddress.map(async (nftAddress) => {
+      let isERC1155 = await nftList.isERC1155(nftAddress);
+      if (isERC1155) address.erc1155.push(nftAddress);
+      else address.erc721.push(nftAddress);
+
+      return;
+    })
+  );
+  return address;
 };
 
 const initERC721 = async (nftList) => {
