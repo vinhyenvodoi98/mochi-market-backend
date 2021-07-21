@@ -9,6 +9,8 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const { EventStream, OldEventStream } = require('./helpers/listenEvent');
+const CronJob = require('cron').CronJob;
+const { exec } = require('child_process');
 
 const app = express();
 
@@ -79,6 +81,23 @@ async function main() {
   });
 
   console.log('Run completed');
+
+  // every 3 hours
+  const job = new CronJob('* * */3 * * *', async () => {
+    exec('node scripts/index.js updateUndefined', (error, stdout, stderr) => {
+      if (error) {
+        console.log(`error: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.log(`stderr: ${stderr}`);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+    });
+  });
+
+  job.start();
 }
 
 main()

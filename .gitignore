@@ -26,3 +26,5 @@ log/
 yarn.lock
 Dockerfile
 .dockerignore
+
+/dump
