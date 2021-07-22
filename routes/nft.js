@@ -17,7 +17,6 @@ router.get('/:address', async (req, res) => {
       limit,
     }).populate({
       path: 'tokens',
-      model: ERC721Token,
       select: ['tokenId', 'tokenURI', 'thumb', 'name', 'image', 'description'],
     });
 
