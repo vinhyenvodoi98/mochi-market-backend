@@ -9,8 +9,8 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const { EventStream, OldEventStream } = require('./helpers/listenEvent');
-const CronJob = require('cron').CronJob;
-const { exec } = require('child_process');
+// const CronJob = require('cron').CronJob;
+// const { exec } = require('child_process');
 
 const app = express();
 
@@ -22,6 +22,7 @@ async function main() {
   const verifyRouter = require('./routes/verify');
   const sellOrderRouter = require('./routes/sellOrder');
   const verifyAllNetworkRouter = require('./routes/verifyAllNetwork');
+  const statusRouter = require('./routes/status');
 
   mongoose.connect(
     process.env.MONGODB_URI,
@@ -61,6 +62,7 @@ async function main() {
   app.use('/sellOrder', cors(corsOptions), sellOrderRouter);
   app.use('/verify', cors(corsOptions), verifyRouter);
   app.use('/verifyAllNetwork', cors(corsOptions), verifyAllNetworkRouter);
+  app.use('/status', statusRouter);
 
   // catch 404 and forward to error handler
   app.use((req, res, next) => {
@@ -83,21 +85,21 @@ async function main() {
   console.log('Run completed');
 
   // every 3 hours
-  const job = new CronJob('* * */3 * * *', async () => {
-    exec('node scripts/index.js updateUndefined', (error, stdout, stderr) => {
-      if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-      }
-      if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-      }
-      console.log(`stdout: ${stdout}`);
-    });
-  });
+  // const job = new CronJob('* * */3 * * *', async () => {
+  //   exec('node scripts/index.js updateUndefined', (error, stdout, stderr) => {
+  //     if (error) {
+  //       console.log(`error: ${error.message}`);
+  //       return;
+  //     }
+  //     if (stderr) {
+  //       console.log(`stderr: ${stderr}`);
+  //       return;
+  //     }
+  //     console.log(`stdout: ${stdout}`);
+  //   });
+  // });
 
-  job.start();
+  // job.start();
 }
 
 main()
