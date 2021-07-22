@@ -57,6 +57,19 @@ router.get('/:filter', async (req, res) => {
 
       sellOrders = await Promise.all(
         orders.map(async (order) => {
+          let tokenInfo = await NFT.findOne(
+            { address: order.address },
+            'tags name symbol address onModel',
+            {
+              skip,
+              limit,
+            }
+          ).populate({
+            path: 'tokens',
+            match: { tokenId: order.tokenId },
+            select: ['tokenId', 'tokenURI', 'thumb', 'name', 'image', 'description'],
+          });
+
           let newSellOrder = {
             sellId: order.sellId.toString(),
             amount: order.amount,
@@ -70,6 +83,7 @@ router.get('/:filter', async (req, res) => {
             tokenPayment: order.token,
             addressToken: order.address,
             is1155: order.onModel === 'ERC1155Token' ? true : false,
+            nft: tokenInfo,
           };
 
           return newSellOrder;
@@ -150,6 +164,19 @@ router.get('/:filter', async (req, res) => {
 
       sellOrders = await Promise.all(
         orders.map(async (order) => {
+          let tokenInfo = await NFT.findOne(
+            { address: order.address },
+            'tags name symbol address onModel',
+            {
+              skip,
+              limit,
+            }
+          ).populate({
+            path: 'tokens',
+            match: { tokenId: order.tokenId },
+            select: ['tokenId', 'tokenURI', 'thumb', 'name', 'image', 'description'],
+          });
+
           let newSellOrder = {
             sellId: order.sellId.toString(),
             amount: order.amount,
@@ -162,6 +189,7 @@ router.get('/:filter', async (req, res) => {
             price: utils.parseEther(order.price.toString()).toString(),
             tokenPayment: order.token,
             addressToken: order.address,
+            nft: tokenInfo,
           };
 
           return newSellOrder;
@@ -178,6 +206,19 @@ router.get('/:filter', async (req, res) => {
 
       sellOrders = await Promise.all(
         orders.map(async (order) => {
+          let tokenInfo = await NFT.findOne(
+            { address: order.address },
+            'tags name symbol address onModel',
+            {
+              skip,
+              limit,
+            }
+          ).populate({
+            path: 'tokens',
+            match: { tokenId: order.tokenId },
+            select: ['tokenId', 'tokenURI', 'thumb', 'name', 'image', 'description'],
+          });
+
           let newSellOrder = {
             sellId: order.sellId.toString(),
             amount: order.amount,
@@ -190,6 +231,7 @@ router.get('/:filter', async (req, res) => {
             price: utils.parseEther(order.price.toString()).toString(),
             tokenPayment: order.token,
             addressToken: order.address,
+            nft: tokenInfo,
           };
 
           return newSellOrder;
