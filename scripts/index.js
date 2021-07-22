@@ -405,10 +405,62 @@ const updateUndefinedImage = async (nftAddress) => {
   }
 };
 
+// update only nft info
+const updateOnlyNftInfo = async () => {
+  const { erc721, erc1155 } = await getAcceptedNfts();
+
+  const nftInfo = async (nftAddress, onModel) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let recordedNFT = await NFT.findOne({ address: nftAddress.toLowerCase() });
+        if (!recordedNFT) {
+          let instance;
+          if (onModel === 'ERC1155Token') instance = await initERC1155Single(nftAddress);
+          else instance = await initERC721Single(nftAddress);
+
+          // Save ERC basic info
+          let name = await instance.name();
+          let symbol = await instance.symbol();
+          let addressToken = instance.address.toLowerCase();
+
+          let nft = new NFT({
+            name,
+            symbol,
+            address: addressToken,
+            onModel: onModel,
+          });
+
+          await nft.save();
+          console.log('nft name: ', name);
+        }
+        resolve();
+      } catch (error) {
+        reject();
+      }
+    });
+  };
+
+  await Promise.all(
+    erc721.map(async (instance) => {
+      return await nftInfo(instance, 'ERC721Token');
+    })
+  );
+
+  await Promise.all(
+    erc1155.map(async (instance) => {
+      return await nftInfo(instance, 'ERC1155Token');
+    })
+  );
+
+  console.log('DONE');
+  process.exit(0);
+};
+
 const main = async () => {
   var myArgs = process.argv.slice(2);
   if (myArgs[0] === 'erc721') await fetchErc721();
   else if (myArgs[0] === 'erc1155') await fetchErc1155(myArgs[1]);
+  else if (myArgs[0] === 'allNft') await updateOnlyNftInfo();
   else if (myArgs[0] === 'nftAddress') await fetchNftByAddress(myArgs[1]);
   else if (myArgs[0] === 'imgDown721') await reduceImageQuality721(myArgs[1], myArgs[2]);
   else if (myArgs[0] === 'imgDown1155') await reduceImageQuality1155(myArgs[1], myArgs[2]);
