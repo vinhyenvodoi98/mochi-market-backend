@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const NFT = require('../models/NFT');
+// const NFT = require('../models/NFT');
 const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
 

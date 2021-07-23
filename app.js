@@ -8,15 +8,15 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const { EventStream, OldEventStream } = require('./helpers/listenEvent');
-// const CronJob = require('cron').CronJob;
-// const { exec } = require('child_process');
+const CronJob = require('cron').CronJob;
+const { exec } = require('child_process');
 
 const app = express();
 
 require('dotenv').config();
 
 async function main() {
+  const collectionRouter = require('./routes/collection');
   const nftRouter = require('./routes/nft');
   const userRouter = require('./routes/user');
   const verifyRouter = require('./routes/verify');
@@ -45,11 +45,7 @@ async function main() {
     },
   };
 
-  // new event around 5k block so we need create event listen of old collection
-  OldEventStream();
-  EventStream();
-
-  // app.use(cors());
+  app.use(cors());
   app.use(helmet());
   app.use(bodyParser.json());
   app.use(express.urlencoded({ extended: true }));
@@ -57,12 +53,12 @@ async function main() {
 
   app.use(express.static(path.join(__dirname, 'public')));
 
-  app.use('/nft', cors(corsOptions), nftRouter);
-  app.use('/user', cors(corsOptions), userRouter);
-  app.use('/sellOrder', cors(corsOptions), sellOrderRouter);
-  app.use('/verify', cors(corsOptions), verifyRouter);
-  app.use('/verifyAllNetwork', cors(corsOptions), verifyAllNetworkRouter);
-  app.use('/status', statusRouter);
+  app.use('/collection', /**cors(corsOptions),**/ collectionRouter);
+  app.use('/nft', /**cors(corsOptions),**/ nftRouter);
+  app.use('/user', /**cors(corsOptions),**/ userRouter);
+  app.use('/sellOrder', /**cors(corsOptions),**/ sellOrderRouter);
+  app.use('/verify', /**cors(corsOptions),**/ verifyRouter);
+  app.use('/verifyAllNetwork', /**cors(corsOptions),**/ verifyAllNetworkRouter);
 
   // catch 404 and forward to error handler
   app.use((req, res, next) => {
@@ -84,7 +80,7 @@ async function main() {
 
   console.log('Run completed');
 
-  // every 3 hours
+  // // every 3 hours
   // const job = new CronJob('* * */3 * * *', async () => {
   //   exec('node scripts/index.js updateUndefined', (error, stdout, stderr) => {
   //     if (error) {

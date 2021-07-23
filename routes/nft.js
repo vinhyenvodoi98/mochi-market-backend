@@ -1,95 +1,108 @@
 const express = require('express');
 const router = express.Router();
-const { check, validationResult } = require('express-validator');
-const NFT = require('../models/NFT');
-const ERC721Token = require('../models/ERC721Token');
-const ERC1155Token = require('../models/ERC1155Token');
+const Collection = require('../models/Collection');
+const ERC721NFT = require('../models/ERC721NFT');
+const ERC1155NFT = require('../models/ERC1155NFT');
 
-router.get('/:address', async (req, res) => {
+const { initERC721Single, initERC1155Single } = require('../helpers/blockchain');
+const { addERC721NFT, addERC1155NFT } = require('../scripts/nft');
+
+router.get('/:chainId/:address', async (req, res) => {
   try {
-    var { address } = req.params;
+    let { address, chainId } = req.params;
     address = address.toLowerCase();
-    const skip = parseInt(req.query.skip);
-    const limit = parseInt(req.query.limit);
+    let collection, nfts;
 
-    let tokens = await NFT.find({ address }, 'tags name symbol address onModel', {
-      skip,
-      limit,
-    }).populate({
-      path: 'tokens',
-      select: ['tokenId', 'tokenURI', 'thumb', 'name', 'image', 'description'],
-    });
+    let skip = parseInt(req.query.skip);
+    let limit = parseInt(req.query.limit);
 
-    tokens = tokens.filter((token) => token.tokens.length > 0);
-
-    return res.json({ tokens });
-  } catch (err) {
-    return res.status(500).end();
-  }
-});
-
-router.post('/transfer', async (req, res) => {
-  try {
-    var { contractAddress, from, to, tokenId } = req.body;
-    contractAddress = contractAddress.toLowerCase();
-    from = from.toLowerCase();
-    to = to.toLowerCase();
-
-    let token = {};
-
-    let newDocFrom = await NFT.findOne(
-      { address: from, addressToken: contractAddress },
-      (err, listTokens) => {
-        token = listTokens.tokens
-          .filter((el) => {
-            return parseInt(el.index) === parseInt(tokenId);
-          })
-          .pop();
-      }
-    );
-
-    newDocFrom.tokens = newDocFrom.tokens.filter((el) => parseInt(el.index) !== parseInt(tokenId));
-    await newDocFrom.save();
-
-    let newDocTo = await NFT.findOne({ address: to, addressToken: contractAddress });
-    if (!newDocTo) {
-      newDocTo = new NFT({
-        address: to,
-        addressToken: contractAddress,
-        name: newDocFrom.name,
-        symbol: newDocFrom.symbol,
-        tokens: [token],
-      });
-    } else {
-      newDocTo.tokens = newDocTo.tokens.push(token);
+    if (limit > 20) {
+      throw new Errow();
     }
 
-    await newDocTo.save();
+    collection = await Collection.findOne(
+      { address, chainId },
+      { type: 1, isVerify: 1, name: 1, symbol: 1, address: 1, uriFormat: 1, _id: 0 }
+    );
 
-    return res.json({ token });
+    if (collection.type === 'ERC721Token') {
+      nfts = await ERC721NFT.find(
+        { collectionAddress: address, chainId: chainId },
+        { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 }
+      )
+        .skip(skip)
+        .limit(limit);
+    } else if (collection.type === 'ERC1155Token') {
+      nfts = await ERC1155NFT.find(
+        { collectionAddress: address, chainId: chainId },
+        { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 }
+      )
+        .skip(skip)
+        .limit(limit);
+    }
+
+    return res.json({ nfts });
   } catch (err) {
-    console.log({ err });
+    console.log(err);
     return res.status(500).end();
   }
 });
 
-router.get('/:address/:tokenId', async (req, res) => {
-  var { address, tokenId } = req.params;
-  address = address.toLowerCase();
+router.get('/:chainId/:address/:tokenId', async (req, res) => {
   try {
-    let token = await NFT.findOne({ address }, 'tags name symbol address onModel').populate([
-      {
-        path: 'tokens',
-        match: { tokenId },
-        select: ['tokenId', 'attributes', 'tokenURI', 'thumb', 'name', 'image', 'description'],
-      },
-    ]);
-
-    if (!!token && token.tokens.length > 0) return res.json(token.tokens[0]);
-    else return res.json(null);
+    var { address, chainId, tokenId } = req.params;
+    address = address.toLowerCase();
+    let nft = await checkNft(chainId, address, tokenId);
+    return res.json(nft);
   } catch (err) {
+    console.log(err);
     return res.status(500).end();
   }
 });
+
+const checkNft = async (chainId, address, tokenId) => {
+  address = address.toLowerCase();
+
+  let nft;
+
+  let collection = await Collection.findOne({ address: address, chainId: chainId });
+  if (collection == null) {
+    return;
+  }
+
+  if (collection.type === 'ERC721Token') {
+    nft = await ERC721NFT.findOne(
+      { chainId: chainId, collectionAddress: address, tokenId: tokenId },
+      { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 }
+    );
+
+    if (!nft) {
+      let instance = initERC721Single(chainId, address);
+      await addERC721NFT(chainId, instance, collection.uriFormat, tokenId);
+
+      nft = await ERC721NFT.findOne(
+        { chainId: chainId, collectionAddress: address, tokenId: tokenId },
+        { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 }
+      );
+    }
+    return nft;
+  } else if (collection.type === 'ERC1155Token') {
+    nft = await ERC1155NFT.findOne(
+      { chainId: chainId, collectionAddress: address, tokenId: tokenId },
+      { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 }
+    );
+
+    if (nft == null) {
+      let instance = initERC1155Single(chainId, address);
+      await addERC1155NFT(chainId, instance, collection.uriFormat, tokenId);
+      nft = await ERC1155NFT.findOne(
+        { chainId: chainId, collectionAddress: address, tokenId: tokenId },
+        { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 }
+      );
+    }
+
+    return nft;
+  }
+};
 
 module.exports = router;
