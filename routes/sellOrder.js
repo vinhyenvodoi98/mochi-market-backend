@@ -158,7 +158,13 @@ router.get('/:filter', async (req, res) => {
     } else if (filter === 'availableSellOrderERC721') {
       let query = [
         //find by token address but if not return all sellorder
-        { $match: { status: 'Create', address: tokenAddress ? tokenAddress : { $regex: /0x*/ } } },
+        {
+          $match: {
+            status: 'Create',
+            address: tokenAddress ? tokenAddress : { $regex: /0x*/ },
+            onModel: 'ERC721Token',
+          },
+        },
         { $sort: { sellTime: -1 } },
         {
           $lookup: {
@@ -205,8 +211,6 @@ router.get('/:filter', async (req, res) => {
 
       let orders = await SellOrder.aggregate(query);
 
-      console.log(orders);
-
       sellOrders = await Promise.all(
         orders.map(async (order) => {
           let newSellOrder = {
@@ -230,7 +234,13 @@ router.get('/:filter', async (req, res) => {
     } else if (filter === 'availableSellOrderERC1155') {
       let query = [
         //find by token address but if not return all sellorder
-        { $match: { status: 'Create', address: tokenAddress ? tokenAddress : { $regex: /0x*/ } } },
+        {
+          $match: {
+            status: 'Create',
+            address: tokenAddress ? tokenAddress : { $regex: /0x*/ },
+            onModel: 'ERC1155Token',
+          },
+        },
         { $sort: { sellTime: -1 } },
         {
           $lookup: {
