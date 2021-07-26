@@ -61,15 +61,11 @@ router.get('/:filter', async (req, res) => {
         orders.map(async (order) => {
           let tokenInfo = await NFT.findOne(
             { address: order.address },
-            'tags name symbol address onModel',
-            {
-              skip,
-              limit,
-            }
+            'tags name symbol address onModel'
           ).populate({
             path: 'tokens',
             match: { tokenId: order.tokenId },
-            select: ['tokenId', 'tokenURI', 'thumb', 'name', 'image', 'description'],
+            select: ['tokenId', 'attributes', 'tokenURI', 'thumb', 'name', 'image', 'description'],
           });
 
           let newSellOrder = {
