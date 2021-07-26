@@ -4,7 +4,8 @@ const { Schema } = mongoose;
 const ERC1155TokenSchema = new Schema(
   {
     tokenId: {
-      type: String,
+      type: Number,
+      required: true,
     },
     tokenURI: {
       type: String,
