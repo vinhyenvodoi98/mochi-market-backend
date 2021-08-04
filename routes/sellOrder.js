@@ -6,6 +6,7 @@ const ERC1155NFT = require('../models/ERC1155NFT');
 const Collection = require('../models/Collection');
 const { getSellOrderListInstance } = require('../utils/getContractInstance');
 const { addSellOrder, updateSellOrder } = require('../scripts/sellOrder');
+const { isAddress } = require('../helpers/verifyAddress');
 
 router.get('/:chainId', async (req, res) => {
   try {
@@ -366,6 +367,10 @@ router.get('/filterByAttributes/:chainId/:address', async (req, res) => {
     let { address, chainId } = req.params;
     address = address.toLowerCase();
 
+    if (!isAddress(address)) {
+      return res.status(400).json({ msg: 'Address is not valid' });
+    }
+
     let skip = parseInt(req.query.skip);
     let limit = parseInt(req.query.limit);
     let token = req.query.token;
@@ -538,6 +543,10 @@ router.get('/filterByAttributes/:chainId/:address/:searchString', async (req, re
   try {
     let { address, chainId, searchString } = req.params;
     address = address.toLowerCase();
+
+    if (!isAddress(address)) {
+      return res.status(400).json({ msg: 'Address is not valid' });
+    }
 
     let skip = parseInt(req.query.skip);
     let limit = parseInt(req.query.limit);
@@ -718,6 +727,11 @@ router.get('/byCollection/:chainId/:address', async (req, res) => {
   try {
     let { address, chainId } = req.params;
     address = address.toLowerCase();
+
+    if (!isAddress(address)) {
+      return res.status(400).json({ msg: 'Address is not valid' });
+    }
+
     let sellOrders;
     let skip = parseInt(req.query.skip);
     let limit = parseInt(req.query.limit);
@@ -789,6 +803,11 @@ router.get('/byCollection/:chainId/:address/:searchString', async (req, res) => 
   try {
     let { address, chainId, searchString } = req.params;
     address = address.toLowerCase();
+
+    if (!isAddress(address)) {
+      return res.status(400).json({ msg: 'Address is not valid' });
+    }
+
     let sellOrders;
     let skip = parseInt(req.query.skip);
     let limit = parseInt(req.query.limit);
@@ -888,6 +907,11 @@ router.get('/byUser/:chainId/:address', async (req, res) => {
   try {
     let { address, chainId } = req.params;
     address = address.toLowerCase();
+
+    if (!isAddress(address)) {
+      return res.status(400).json({ msg: 'Address is not valid' });
+    }
+
     let sellOrders;
     let skip = parseInt(req.query.skip);
     let limit = parseInt(req.query.limit);
@@ -995,6 +1019,11 @@ router.get('/byNft/:chainId/:address/:tokenId', async (req, res) => {
   try {
     let { chainId, address, tokenId } = req.params;
     address = address.toLowerCase();
+
+    if (!isAddress(address)) {
+      return res.status(400).json({ msg: 'Address is not valid' });
+    }
+
     let token = req.query.token;
     let asc = 1;
 

@@ -1,11 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const Collection = require('../models/Collection');
+const { isAddress } = require('../helpers/verifyAddress');
 
 router.get('/:chainId/:address', async (req, res) => {
   try {
     let { address, chainId } = req.params;
     address = address.toLowerCase();
+
+    if (!isAddress(address)) {
+      return res.status(400).json({ msg: 'Address is not valid' });
+    }
+
     let collection = await Collection.findOne(
       { chainId: chainId, address: address },
       { type: 1, isVerify: 1, name: 1, symbol: 1, address: 1, uriFormat: 1, _id: 0 }
