@@ -1,0 +1,183 @@
+const COLLECTION_CONSTANT = [
+  // 137 Polygon
+  {
+    address: '0xbca30d6d18f0c5ac15e0be5c9b389d2df207d19e',
+    chainId: '137',
+    uriFormat: 'https://gameitems.service.cometh.io/{id}',
+    type: 'ERC1155Token',
+    tokenIds: { min: 0, max: 3 },
+    name: 'Cometh Game Items (CGI)',
+  },
+  {
+    address: '0x8580a90f6e378db283ddb8af06356a962551e89a',
+    chainId: '137',
+    uriFormat: 'https://app.loserchick.fi/loser/getUrl?name=LuckyChick&tokenId=${id}',
+    type: 'ERC721Token',
+    tokenIds: null,
+    name: 'LuckyChick',
+  },
+  {
+    address: '0x388eb34b54fe92e944b81a23f8e60146ca838180',
+    chainId: '137',
+    uriFormat: '',
+    type: 'ERC721Token',
+    tokenIds: null,
+    name: 'LaborChick',
+  },
+  {
+    address: '0x4f1e6318acc9ee33c88f0e3e3578d5ad62e19285',
+    chainId: '137',
+    uriFormat: '',
+    type: 'ERC721Token',
+    tokenIds: null,
+    name: 'BOSSChick',
+  },
+  {
+    address: '0x4f17c6514b9ca3abccfdefd12df2dfa195a76dc4',
+    chainId: '137',
+    uriFormat: 'https://app.loserchick.fi/loser/getUrl?name=TrumpChick&tokenId={id}',
+    type: 'ERC721Token',
+    tokenIds: null,
+    name: 'TrumpChick',
+  },
+  {
+    address: '0xe50b1f6e58a0a77b0a41aedc085190808d25d706',
+    chainId: '137',
+    uriFormat: '',
+    type: 'ERC721Token',
+    tokenIds: null,
+    name: 'ShriekingChick',
+  },
+  {
+    address: '0x7f8d8f602c37999385f370b11c6075d53ae94f52',
+    chainId: '137',
+    uriFormat: 'https://battleracers.io/api/items/{id}',
+    tokenIds: { min: 1, max: 1000 },
+    type: 'ERC721Token',
+    name: 'BattleRacers',
+  },
+  {
+    address: '0xc0cee8f3799be895e8f53ee97ab66d7581017b5f',
+    chainId: '137',
+    uriFormat: 'https://nft.service.cometh.io/{id}',
+    tokenIds: [1000000000],
+    type: 'ERC1155Token',
+    name: 'Cometh',
+  },
+  {
+    address: '0x85bc2e8aaad5dbc347db49ea45d95486279ed918',
+    chainId: '137',
+    uriFormat: 'https://nft.service.cometh.io/{id}',
+    type: 'ERC721Token',
+    tokenIds: [
+      26000061,
+      53000000,
+      8000009,
+      10000001,
+      14000010,
+      38000004,
+      45000083,
+      21000128,
+      21000127,
+      26000069,
+      33000090,
+      26000065,
+    ],
+    name: 'Cometh',
+  },
+
+  // 56 BSC Mainnet
+  {
+    address: '0x3e629332c51046a17ec236553cb931cf0548b5e1',
+    chainId: '56',
+    uriFormat: '',
+    tokenIds: { min: 1, max: 666 },
+    type: 'ERC721Token',
+    name: 'Fear',
+  },
+  {
+    address: '0xa7a9a8156c24c4b0ca910c3ba842d1f1ac7200ef',
+    chainId: '56',
+    uriFormat: ' https://service.faraland.io/api/hero/id/{id}',
+    tokenIds: null,
+    type: 'ERC721Token',
+    name: 'Faraland',
+  },
+  {
+    address: '0xc33d69a337b796a9f0f7588169cd874c3987bde9',
+    chainId: '56',
+    uriFormat: 'https://api.kryptomon.co/json/kryptomon/meta/{id}',
+    tokenIds: {
+      min: 0,
+      max: 5279,
+    },
+    type: 'ERC721Token',
+    name: 'Kryptomon',
+  },
+  {
+    address: '0x301817312598f8f48cb7d898d659ca4a4d457ad8',
+    chainId: '56',
+    uriFormat: 'https://noftgames.io/nofts/meta/{id}',
+    tokenIds: {
+      min: 1,
+      max: 587,
+    },
+    type: 'ERC721Token',
+    name: 'Noft',
+  },
+  {
+    address: '0x0ac1bd198db93d7ec428b698dcef2e43dbcea7d1',
+    chainId: '56',
+    uriFormat: 'https://pepemon.finance/api/cards/bsc/{id}',
+    tokenIds: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    type: 'ERC1155Token',
+    name: 'Pepemon',
+  },
+  {
+    address: '0x56536c54abb2d2d2512965af01c98550edb15ef9',
+    chainId: '56',
+    uriFormat: '{tokenUri}.json',
+    tokenIds: null,
+    type: 'ERC721Token',
+    name: 'Block Creatures',
+  },
+
+  // 97 BSC Testnet
+  {
+    address: '0x588b1bc44a9531833e49c1a4f295f2bc3a162fb3',
+    chainId: '97',
+    uriFormat: 'https://dev-files.wanakafarm.com/data/lands/{id}',
+    type: 'ERC721Token',
+    tokenIds: { min: 1, max: 20 },
+    name: 'Wanaka Land (WLAND)',
+  },
+  {
+    address: '0x85605b7f6bf89b1f66519da95bcc6fcf426c9e47',
+    chainId: '97',
+    uriFormat: '{tokenUri}.json',
+    type: 'ERC721Token',
+    tokenIds: null,
+    name: 'Block Creatures',
+  },
+];
+
+const NETWORK_CONSTANT = [
+  { name: 'bsc', rpc: 'https://bsc-dataseed.binance.org/', chainId: '56', newestBlock: 56785758 },
+  {
+    name: 'polygon',
+    rpc: 'https://matic-mainnet.chainstacklabs.com/',
+    chainId: '137',
+    newestBlock: 56785758,
+  },
+  {
+    name: 'bsc-testnet',
+    rpc: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
+    chainId: '97',
+    newestBlock: 56785758,
+  },
+];
+
+module.exports = {
+  COLLECTION_CONSTANT,
+  NETWORK_CONSTANT,
+};

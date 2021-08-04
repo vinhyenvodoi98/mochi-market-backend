@@ -1,6 +1,6 @@
 const { ethers } = require('ethers');
 const { getContractAddress } = require('./getContractAddress');
-const { provider } = require('./getProvider');
+const { getProvider } = require('./getProvider');
 
 require('dotenv').config();
 
@@ -13,28 +13,53 @@ const nftCampaignArtifacts = require('../contracts/NFTCampaign.json');
 const addressProviderArtifacts = require('../contracts/AddressesProvider.json');
 const MochiERC721NFT = require('../contracts/MochiERC721NFT.json');
 
-let contractAddress = getContractAddress(process.env.CHAIN_ID);
+exports.getMarketInstance = (chainId) => {
+  let contractAddress = getContractAddress(chainId);
+  let provider = getProvider(chainId);
+  return new ethers.Contract(contractAddress.Market, marketArtifacts.abi, provider);
+};
 
-exports.getMarketInstance = () =>
-  new ethers.Contract(contractAddress.Market, marketArtifacts.abi, provider);
+exports.getNftListInstance = (chainId) => {
+  let contractAddress = getContractAddress(chainId);
+  let provider = getProvider(chainId);
+  return new ethers.Contract(contractAddress.NftList, nftListArtifacts.abi, provider);
+};
 
-exports.getNftListInstance = () =>
-  new ethers.Contract(contractAddress.NftList, nftListArtifacts.abi, provider);
+exports.getSellOrderListInstance = (chainId) => {
+  let contractAddress = getContractAddress(chainId);
+  let provider = getProvider(chainId);
+  return new ethers.Contract(contractAddress.SellOrderList, sellOrderListArtifacts.abi, provider);
+};
 
-exports.getSellOrderListInstance = () =>
-  new ethers.Contract(contractAddress.SellOrderList, sellOrderListArtifacts.abi, provider);
+exports.getVaultInstance = (chainId) => {
+  let contractAddress = getContractAddress(chainId);
+  let provider = getProvider(chainId);
+  return new ethers.Contract(contractAddress.Vault, vaultArtifacts.abi, provider);
+};
 
-exports.getVaultInstance = () =>
-  new ethers.Contract(contractAddress.Vault, vaultArtifacts.abi, provider);
+exports.getCreativeStudioInstance = (chainId) => {
+  let contractAddress = getContractAddress(chainId);
+  let provider = getProvider(chainId);
+  return new ethers.Contract(contractAddress.CreativeStudio, creativeStudioArtifacts.abi, provider);
+};
 
-exports.getCreativeStudioInstance = () =>
-  new ethers.Contract(contractAddress.CreativeStudio, creativeStudioArtifacts.abi, provider);
+exports.getNftCampaignInstance = (chainId) => {
+  let contractAddress = getContractAddress(chainId);
+  let provider = getProvider(chainId);
+  return new ethers.Contract(contractAddress.NFTCampaign, nftCampaignArtifacts.abi, provider);
+};
 
-exports.getNftCampaignInstance = () =>
-  new ethers.Contract(contractAddress.NFTCampaign, nftCampaignArtifacts.abi, provider);
-
-exports.getAddressProviderInstance = () =>
-  new ethers.Contract(contractAddress.AddressesProvider, addressProviderArtifacts.abi, provider);
-
-exports.getMochiERC721Instance = () =>
-  new ethers.Contract(contractAddress.Mochi, MochiERC721NFT.abi, provider);
+exports.getAddressProviderInstance = (chainId) => {
+  let contractAddress = getContractAddress(chainId);
+  let provider = getProvider(chainId);
+  return new ethers.Contract(
+    contractAddress.AddressesProvider,
+    addressProviderArtifacts.abi,
+    provider
+  );
+};
+exports.getMochiERC721Instance = (chainId) => {
+  let contractAddress = getContractAddress(chainId);
+  let provider = getProvider(chainId);
+  return new ethers.Contract(contractAddress.Mochi, MochiERC721NFT.abi, provider);
+};

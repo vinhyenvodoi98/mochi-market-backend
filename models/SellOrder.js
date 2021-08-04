@@ -4,27 +4,22 @@ const { Schema } = mongoose;
 const SellOrderSchema = new Schema(
   {
     sellId: {
-      type: String,
-      required: true,
-    },
-    nftAddress: { type: Schema.Types.ObjectId, ref: 'NFT' },
-    address: { type: String },
-    onModel: {
-      type: String,
-      required: true,
-      enum: ['ERC721Token', 'ERC1155Token'],
-    },
-    tokenId: {
       type: Number,
       required: true,
     },
-    amount: {
+    chainId: {
       type: String,
-      default: '1',
+    },
+    collectionAddress: { type: String, match: [/^0x[a-fA-F0-9]{40}$/, 'address is invalid'] },
+    tokenId: {
+      type: String,
+      required: true,
+    },
+    amount: {
+      type: Number,
     },
     soldAmount: {
-      type: String,
-      default: '0',
+      type: Number,
     },
     seller: {
       type: String,
@@ -43,10 +38,8 @@ const SellOrderSchema = new Schema(
     },
     buyers: [],
     buyTimes: [],
-    status: {
-      type: String,
-      enum: ['Create', 'Complete', 'Cancel'],
-      default: 'Create',
+    isActive: {
+      type: Boolean,
     },
   },
   {
@@ -54,6 +47,7 @@ const SellOrderSchema = new Schema(
   }
 );
 
+SellOrderSchema.index({ chainId: 1, sellId: 1 }, { unique: true });
 const SellOrder = mongoose.model('SellOrder', SellOrderSchema);
 
 module.exports = SellOrder;
