@@ -3,6 +3,7 @@ const router = express.Router();
 const Collection = require('../models/Collection');
 const ERC721NFT = require('../models/ERC721NFT');
 const ERC1155NFT = require('../models/ERC1155NFT');
+const { isAddress } = require('../helpers/verifyAddress');
 
 const { initERC721Single, initERC1155Single } = require('../helpers/blockchain');
 const { addERC721NFT, addERC1155NFT } = require('../scripts/nft');
@@ -11,6 +12,11 @@ router.get('/:chainId/:address', async (req, res) => {
   try {
     let { address, chainId } = req.params;
     address = address.toLowerCase();
+
+    if (!isAddress(address)) {
+      return res.status(400).json({ msg: 'Address is not valid' });
+    }
+
     let collection, nfts;
 
     let skip = parseInt(req.query.skip);
@@ -52,6 +58,11 @@ router.get('/:chainId/:address/:tokenId', async (req, res) => {
   try {
     var { address, chainId, tokenId } = req.params;
     address = address.toLowerCase();
+
+    if (!isAddress(address)) {
+      return res.status(400).json({ msg: 'Address is not valid' });
+    }
+
     let nft = await checkNft(chainId, address, tokenId);
     return res.json(nft);
   } catch (err) {
@@ -62,6 +73,10 @@ router.get('/:chainId/:address/:tokenId', async (req, res) => {
 
 const checkNft = async (chainId, address, tokenId) => {
   address = address.toLowerCase();
+
+  if (!isAddress(address)) {
+    return res.status(400).json({ msg: 'Address is not valid' });
+  }
 
   let nft;
 

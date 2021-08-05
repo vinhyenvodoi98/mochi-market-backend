@@ -8,8 +8,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const CronJob = require('cron').CronJob;
-const { exec } = require('child_process');
 
 const app = express();
 
@@ -34,7 +32,8 @@ async function main() {
 
   mongoose.set('useCreateIndex', true);
 
-  let whitelist = [process.env.ORIGIN_CORS];
+  const orginCors = process.env.ORIGIN_CORS;
+  let whitelist = orginCors.split(',');
   let corsOptions = {
     origin: function (origin, callback) {
       if (whitelist.indexOf(origin) !== -1) {
@@ -45,7 +44,7 @@ async function main() {
     },
   };
 
-  app.use(cors());
+  //app.use(cors());
   app.use(helmet());
   app.use(bodyParser.json());
   app.use(express.urlencoded({ extended: true }));
@@ -53,12 +52,13 @@ async function main() {
 
   app.use(express.static(path.join(__dirname, 'public')));
 
-  app.use('/collection', /**cors(corsOptions),**/ collectionRouter);
-  app.use('/nft', /**cors(corsOptions),**/ nftRouter);
-  app.use('/user', /**cors(corsOptions),**/ userRouter);
-  app.use('/sellOrder', /**cors(corsOptions),**/ sellOrderRouter);
-  app.use('/verify', /**cors(corsOptions),**/ verifyRouter);
-  app.use('/verifyAllNetwork', /**cors(corsOptions),**/ verifyAllNetworkRouter);
+  app.use('/collection', cors(corsOptions), collectionRouter);
+  app.use('/nft', cors(corsOptions), nftRouter);
+  app.use('/user', cors(corsOptions), userRouter);
+  app.use('/sellOrder', cors(corsOptions), sellOrderRouter);
+  app.use('/verify', cors(corsOptions), verifyRouter);
+  app.use('/verifyAllNetwork', cors(corsOptions), verifyAllNetworkRouter);
+  app.use('/status', statusRouter);
 
   // catch 404 and forward to error handler
   app.use((req, res, next) => {
@@ -79,23 +79,6 @@ async function main() {
   });
 
   console.log('Run completed');
-
-  // // every 3 hours
-  // const job = new CronJob('* * */3 * * *', async () => {
-  //   exec('node scripts/index.js updateUndefined', (error, stdout, stderr) => {
-  //     if (error) {
-  //       console.log(`error: ${error.message}`);
-  //       return;
-  //     }
-  //     if (stderr) {
-  //       console.log(`stderr: ${stderr}`);
-  //       return;
-  //     }
-  //     console.log(`stdout: ${stdout}`);
-  //   });
-  // });
-
-  // job.start();
 }
 
 main()
