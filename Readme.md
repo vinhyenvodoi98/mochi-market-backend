@@ -35,17 +35,17 @@ node helpers/listenEvent.js
 ### BSC Mainnet
 
 ```bash
-node scripts/scripts.js actiSellOrder 56
+node scripts/scripts.js activeSellOrder 56
 ```
 
 ### BSC Testnet
 
 ```bash
-node scripts/scripts.js actiSellOrder 97
+node scripts/scripts.js activeSellOrder 97
 ```
 
 ### Polygon
 
 ```bash
-node scripts/scripts.js actiSellOrder 137
+node scripts/scripts.js activeSellOrder 137
 ```

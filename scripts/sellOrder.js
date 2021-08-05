@@ -21,7 +21,7 @@ const addSellOrder = async (chainId, sellOrderInfo) => {
     let collectionAddress = sellOrderInfo.nftAddress.toLowerCase();
     let tokenId = sellOrderInfo.tokenId.toString();
 
-    console.log('[ADD SELL ORDER] chainId: ' + chainId + ', sellOrderId: ' + sellId);
+    console.log('[ADD SELL ORDER] chainId: ' + chainId + ', sellId: ' + sellId);
     let sellOrder = new SellOrder({
       chainId: chainId,
       sellId: sellId,
@@ -86,22 +86,61 @@ const updateSellOrder = async (chainId, sellOrderInfo) => {
     let collectionAddress = sellOrderInfo.nftAddress.toLowerCase();
     let tokenId = sellOrderInfo.tokenId.toString();
 
-    console.log('[UPDATE SELL ORDER] chainId: ' + chainId + ', sellOrderId: ' + sellId);
+    let mess = '[UPDATE SELL ORDER] chainId: ' + chainId + ', sellId: ' + sellId;
 
     let sellOrder = await SellOrder.findOne({ chainId: chainId, sellId, sellId });
+    let change = false;
+    if (sellOrder.tokenId !== sellOrderInfo.tokenId.toString()) {
+      sellOrder.tokenId = sellOrderInfo.tokenId.toString();
+      change = !change ? true : change;
+      mess = mess + ', tokenId: ' + sellOrderInfo.tokenId.toString();
+    }
+    if (sellOrder.amount !== parseInt(sellOrder.amount)) {
+      sellOrder.amount = parseInt(sellOrder.amount);
+      change = !change ? true : change;
+      mess = mess + ', amount: ' + parseInt(sellOrderInfo.amount);
+    }
+    if (sellOrder.soldAmount !== parseInt(sellOrderInfo.soldAmount)) {
+      sellOrder.soldAmount = parseInt(sellOrderInfo.soldAmount);
+      change = true;
+      mess = mess + ', soldAmount: ' + parseInt(sellOrderInfo.soldAmount);
+    }
+    if (sellOrder.seller !== sellOrderInfo.seller.toLowerCase()) {
+      sellOrder.seller = sellOrderInfo.seller.toLowerCase();
+      change = !change ? true : change;
+      mess = mess + ', seller: ' + sellOrderInfo.seller.toLowerCase();
+    }
+    if (sellOrder.price !== parseFloat(utils.formatEther(sellOrderInfo.price.toString()))) {
+      sellOrder.price = parseFloat(utils.formatEther(sellOrderInfo.price.toString()));
+      change = !change ? true : change;
+      mess = mess + ', price: ' + parseFloat(utils.formatEther(sellOrderInfo.price.toString()));
+    }
+    if (sellOrder.token !== sellOrderInfo.token.toLowerCase()) {
+      sellOrder.token = sellOrderInfo.token.toLowerCase();
+      change = !change ? true : change;
+      mess = mess + ', token: ' + sellOrderInfo.token.toLowerCase();
+    }
+    if (sellOrder.isActive != sellOrderInfo.isActive) {
+      sellOrder.isActive = sellOrderInfo.isActive;
+      change = !change ? true : change;
+      mess = mess + ', isActive: ' + sellOrderInfo.isActive;
+    }
+    if (sellOrder.sellTime !== parseInt(sellOrderInfo.sellTime)) {
+      sellOrder.sellTime = parseInt(sellOrderInfo.sellTime);
+      change = !change ? true : change;
+      mess = mess + ', sellTime: ' + parseInt(sellOrderInfo.sellTime);
+    }
+    if (sellOrder.buyers.length !== sellOrderInfo.buyers.length) {
+      sellOrder.buyers = await sellOrderInfo.buyers.map((buyer) => buyer.toLowerCase());
+      sellOrder.buyTimes = await sellOrderInfo.buyTimes.map((buyTime) => parseInt(buyTime));
+      change = !change ? true : change;
+      mess = mess + ', buyers, buyTimes';
+    }
 
-    sellOrder.tokenId = tokenId;
-    sellOrder.amount = parseInt(sellOrderInfo.amount);
-    sellOrder.soldAmount = parseInt(sellOrderInfo.soldAmount);
-    sellOrder.seller = sellOrderInfo.seller.toLowerCase();
-    sellOrder.price = parseFloat(utils.formatEther(sellOrderInfo.price.toString()));
-    sellOrder.token = sellOrderInfo.token.toLowerCase();
-    sellOrder.isActive = sellOrderInfo.isActive;
-    sellOrder.sellTime = parseInt(sellOrderInfo.sellTime.toString());
-    sellOrder.buyers = await sellOrderInfo.buyers.map((buyer) => buyer.toLowerCase());
-    sellOrder.buyTimes = await sellOrderInfo.buyTimes.map((buyTime) => parseInt(buyTime));
-
-    await sellOrder.save();
+    if (change) {
+      console.log(mess);
+      await sellOrder.save();
+    }
 
     let collectionInfo = await Collection.findOne({
       address: collectionAddress,
@@ -145,7 +184,7 @@ const deactiveSellOrder = async (chainId, sellId) => {
       throw Error('Sell Order not exist');
     }
 
-    console.log('[DEACTIVE SELL ORDER] chainId: ' + chainId + ', sellOrderId: ' + sellId);
+    console.log('[DEACTIVE SELL ORDER] chainId: ' + chainId + ', sellId: ' + sellId);
 
     sellOrder.isActive = false;
     await sellOrder.save();
@@ -164,7 +203,7 @@ const updatePrice = async (chainId, sellId, price) => {
       throw Error('Sell Order not exist');
     }
 
-    console.log('[UPDATE PRICE] chainId: ' + chainId + ', sellOrderId: ' + sellId);
+    console.log('[UPDATE PRICE] chainId: ' + chainId + ', sellId: ' + sellId);
 
     sellOrder.price = parseFloat(utils.formatEther(price.toString()));
     await sellOrder.save();
