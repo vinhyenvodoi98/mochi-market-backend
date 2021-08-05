@@ -52,12 +52,12 @@ async function main() {
 
   app.use(express.static(path.join(__dirname, 'public')));
 
-  app.use('/collection', cors(corsOptions), collectionRouter);
-  app.use('/nft', cors(corsOptions), nftRouter);
-  app.use('/user', cors(corsOptions), userRouter);
-  app.use('/sellOrder', cors(corsOptions), sellOrderRouter);
-  app.use('/verify', cors(corsOptions), verifyRouter);
-  app.use('/verifyAllNetwork', cors(corsOptions), verifyAllNetworkRouter);
+  app.use('/collection', /**cors(corsOptions),**/ collectionRouter);
+  app.use('/nft', /**cors(corsOptions),**/ nftRouter);
+  app.use('/user', /**cors(corsOptions),**/ userRouter);
+  app.use('/sellOrder', /**cors(corsOptions),**/ sellOrderRouter);
+  app.use('/verify', /**cors(corsOptions),**/ verifyRouter);
+  app.use('/verifyAllNetwork', /**cors(corsOptions),**/ verifyAllNetworkRouter);
   app.use('/status', statusRouter);
 
   // catch 404 and forward to error handler

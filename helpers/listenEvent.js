@@ -2,6 +2,8 @@ const { getSellOrderListInstance, getNftListInstance } = require('../utils/getCo
 
 const { addCollectionERC1155, addCollectionERC721 } = require('../scripts/collection');
 
+const Collection = require('../models/Collection');
+
 const {
   addSellOrder,
   deactiveSellOrder,
@@ -18,10 +20,16 @@ const EventStream = async (chainId) => {
     const checkERC = async () => {
       try {
         let isERC1155 = await nftListInstance.isERC1155(nftAddress);
-        if (isERC1155) {
-          await addCollectionERC1155(chainId, nftAddress);
-        } else {
-          await addCollectionERC721(chainId, nftAddress);
+        let exist = await Collection.findOne({
+          chainId: chainId,
+          address: nftAddress.toLowerCase(),
+        });
+        if (!exist) {
+          if (isERC1155) {
+            await addCollectionERC1155(chainId, nftAddress);
+          } else {
+            await addCollectionERC721(chainId, nftAddress);
+          }
         }
       } catch (err) {
         console.log({ err });
