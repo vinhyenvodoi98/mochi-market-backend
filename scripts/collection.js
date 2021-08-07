@@ -1,11 +1,6 @@
 const mongoose = require('mongoose');
 const Collection = require('../models/Collection');
-const {
-  getAcceptedNfts,
-  initERC721Single,
-  initERC1155Single,
-  getAllNFTAddress,
-} = require('../helpers/blockchain');
+const { initERC721Single, initERC1155Single, getAllNFTAddress } = require('../helpers/blockchain');
 const { COLLECTION_CONSTANT } = require('../helpers/constant');
 
 require('dotenv').config();
@@ -29,7 +24,6 @@ const InitCollectionsInfo = async (chainId) => {
           chainId: chainId,
           address: address.toLowerCase(),
         });
-
         if (!!exist) {
           await updateCollectionERC721(chainId, address);
         } else {
@@ -77,7 +71,7 @@ const addCollectionERC721 = async (chainId, collectionAddress) => {
 
     let instance = initERC721Single(chainId, collectionAddress);
 
-    let { name, symbol, uriFormat } = await checkCollectionInfo(chainId, instance);
+    let { name, symbol, uriFormat, isAccepted } = await checkCollectionInfo(chainId, instance);
 
     let collection = new Collection({
       chainId: chainId,
@@ -86,6 +80,7 @@ const addCollectionERC721 = async (chainId, collectionAddress) => {
       address: collectionAddress,
       type: 'ERC721Token',
       uriFormat: uriFormat,
+      isAccepted: isAccepted,
     });
 
     await collection.save();
@@ -111,7 +106,7 @@ const addCollectionERC1155 = async (chainId, collectionAddress) => {
 
   let instance = initERC1155Single(chainId, collectionAddress);
 
-  let { name, symbol, uriFormat } = await checkCollectionInfo(chainId, instance);
+  let { name, symbol, uriFormat, isAccepted } = await checkCollectionInfo(chainId, instance);
 
   let collection = new Collection({
     chainId: chainId,
@@ -120,6 +115,7 @@ const addCollectionERC1155 = async (chainId, collectionAddress) => {
     address: collectionAddress,
     type: 'ERC1155Token',
     uriFormat: uriFormat,
+    isAccepted: isAccepted,
   });
 
   await collection.save();
@@ -132,7 +128,7 @@ const updateCollectionERC721 = async (chainId, collectionAddress) => {
 
   let instance = initERC721Single(chainId, collectionAddress);
 
-  let { name, symbol, uriFormat } = await checkCollectionInfo(chainId, instance);
+  let { name, symbol, uriFormat, isAccepted } = await checkCollectionInfo(chainId, instance);
 
   await Collection.findOneAndUpdate(
     { chainId: chainId, address: collectionAddress },
@@ -140,6 +136,7 @@ const updateCollectionERC721 = async (chainId, collectionAddress) => {
       name: name,
       symbol: symbol,
       uriFormat: uriFormat,
+      isAccepted: isAccepted,
     }
   );
 
@@ -153,7 +150,7 @@ const updateCollectionERC1155 = async (chainId, collectionAddress) => {
 
   let instance = initERC1155Single(chainId, collectionAddress);
 
-  let { name, symbol, uriFormat } = await checkCollectionInfo(chainId, instance);
+  let { name, symbol, uriFormat, isAccepted } = await checkCollectionInfo(chainId, instance);
 
   await Collection.findOneAndUpdate(
     { chainId: chainId, address: collectionAddress },
@@ -161,6 +158,7 @@ const updateCollectionERC1155 = async (chainId, collectionAddress) => {
       name: name,
       symbol: symbol,
       uriFormat: uriFormat,
+      isAccepted: isAccepted,
     }
   );
 
@@ -179,11 +177,13 @@ const checkCollectionInfo = async (chainId, instance) => {
   }
 
   uriFormat = collectionConfig.uriFormat == null ? '' : collectionConfig.uriFormat;
+  isAccepted = collectionConfig.isAccepted == null ? false : collectionConfig.isAccepted;
 
   return {
     name: name,
     symbol: symbol,
     uriFormat: uriFormat,
+    isAccepted: isAccepted,
   };
 };
 
@@ -203,6 +203,7 @@ const getCollectionConfig = (chainId, collectionAddress) => {
         type: COLLECTION_CONSTANT[i].type ? COLLECTION_CONSTANT.type : null,
         tokenIds: COLLECTION_CONSTANT[i].tokenIds ? COLLECTION_CONSTANT[i].tokenIds : null,
         uriFormat: COLLECTION_CONSTANT[i].uriFormat ? COLLECTION_CONSTANT[i].uriFormat : null,
+        isAccepted: COLLECTION_CONSTANT[i].isAccepted ? COLLECTION_CONSTANT[i].isAccepted : null,
       };
     }
   }
@@ -215,6 +216,7 @@ const getCollectionConfig = (chainId, collectionAddress) => {
     type: null,
     tokenIds: null,
     uriFormat: null,
+    isAccepted: null,
   };
 };
 

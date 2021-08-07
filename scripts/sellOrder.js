@@ -95,14 +95,14 @@ const updateSellOrder = async (chainId, sellOrderInfo) => {
       change = !change ? true : change;
       mess = mess + ', tokenId: ' + sellOrderInfo.tokenId.toString();
     }
-    if (sellOrder.amount !== parseInt(sellOrder.amount)) {
-      sellOrder.amount = parseInt(sellOrder.amount);
+    if (parseInt(sellOrder.amount) !== parseInt(sellOrderInfo.amount)) {
+      sellOrder.amount = parseInt(sellOrderInfo.amount);
       change = !change ? true : change;
       mess = mess + ', amount: ' + parseInt(sellOrderInfo.amount);
     }
-    if (sellOrder.soldAmount !== parseInt(sellOrderInfo.soldAmount)) {
+    if (parseInt(sellOrder.soldAmount) !== parseInt(sellOrderInfo.soldAmount)) {
       sellOrder.soldAmount = parseInt(sellOrderInfo.soldAmount);
-      change = true;
+      change = !change ? true : change;
       mess = mess + ', soldAmount: ' + parseInt(sellOrderInfo.soldAmount);
     }
     if (sellOrder.seller !== sellOrderInfo.seller.toLowerCase()) {

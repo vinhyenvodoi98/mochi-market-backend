@@ -11,7 +11,7 @@ const ERC1155NFTSchema = new Schema(
       match: [/^0x[a-fA-F0-9]{40}$/, 'address is invalid'],
     },
     tokenId: {
-      type: Number,
+      type: String,
       required: true,
     },
     tokenURI: {
@@ -36,7 +36,7 @@ const ERC1155NFTSchema = new Schema(
   }
 );
 
-ERC1155NFTSchema.index({ name: 'text', description: 'text', attributes: 'text' });
+ERC1155NFTSchema.index({ name: 'text', description: 'text', attributes: 'text', tokenId: 'text' });
 
 const ERC1155NFT = mongoose.model('ERC1155NFT', ERC1155NFTSchema);
 

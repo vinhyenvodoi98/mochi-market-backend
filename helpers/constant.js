@@ -7,6 +7,7 @@ const COLLECTION_CONSTANT = [
     type: 'ERC1155Token',
     tokenIds: { min: 0, max: 3 },
     name: 'Cometh Game Items (CGI)',
+    isAccepted: true,
   },
   {
     address: '0x8580a90f6e378db283ddb8af06356a962551e89a',
@@ -15,6 +16,7 @@ const COLLECTION_CONSTANT = [
     type: 'ERC721Token',
     tokenIds: null,
     name: 'LuckyChick',
+    isAccepted: true,
   },
   {
     address: '0x388eb34b54fe92e944b81a23f8e60146ca838180',
@@ -39,6 +41,7 @@ const COLLECTION_CONSTANT = [
     type: 'ERC721Token',
     tokenIds: null,
     name: 'TrumpChick',
+    isAccepted: true,
   },
   {
     address: '0xe50b1f6e58a0a77b0a41aedc085190808d25d706',
@@ -55,6 +58,7 @@ const COLLECTION_CONSTANT = [
     tokenIds: { min: 1, max: 1000 },
     type: 'ERC721Token',
     name: 'BattleRacers',
+    isAccepted: true,
   },
   {
     address: '0xc0cee8f3799be895e8f53ee97ab66d7581017b5f',
@@ -63,6 +67,7 @@ const COLLECTION_CONSTANT = [
     tokenIds: [1000000000],
     type: 'ERC1155Token',
     name: 'Cometh',
+    isAccepted: true,
   },
   {
     address: '0x85bc2e8aaad5dbc347db49ea45d95486279ed918',
@@ -84,6 +89,7 @@ const COLLECTION_CONSTANT = [
       26000065,
     ],
     name: 'Cometh',
+    isAccepted: true,
   },
 
   // 56 BSC Mainnet
@@ -94,14 +100,16 @@ const COLLECTION_CONSTANT = [
     tokenIds: { min: 1, max: 666 },
     type: 'ERC721Token',
     name: 'Fear',
+    isAccepted: true,
   },
   {
     address: '0xa7a9a8156c24c4b0ca910c3ba842d1f1ac7200ef',
     chainId: '56',
-    uriFormat: ' https://service.faraland.io/api/hero/id/{id}',
+    uriFormat: 'https://service.faraland.io/api/hero/{id}',
     tokenIds: null,
     type: 'ERC721Token',
     name: 'Faraland',
+    isAccepted: true,
   },
   {
     address: '0xc33d69a337b796a9f0f7588169cd874c3987bde9',
@@ -113,6 +121,7 @@ const COLLECTION_CONSTANT = [
     },
     type: 'ERC721Token',
     name: 'Kryptomon',
+    isAccepted: true,
   },
   {
     address: '0x301817312598f8f48cb7d898d659ca4a4d457ad8',
@@ -124,6 +133,7 @@ const COLLECTION_CONSTANT = [
     },
     type: 'ERC721Token',
     name: 'Noft',
+    isAccepted: true,
   },
   {
     address: '0x0ac1bd198db93d7ec428b698dcef2e43dbcea7d1',
@@ -132,6 +142,7 @@ const COLLECTION_CONSTANT = [
     tokenIds: [1, 2, 3, 4, 5, 6, 7, 8, 9],
     type: 'ERC1155Token',
     name: 'Pepemon',
+    isAccepted: true,
   },
   {
     address: '0x56536c54abb2d2d2512965af01c98550edb15ef9',
@@ -140,6 +151,16 @@ const COLLECTION_CONSTANT = [
     tokenIds: null,
     type: 'ERC721Token',
     name: 'Block Creatures',
+    isAccepted: true,
+  },
+  {
+    address: '0x9a1615b836c9c6d060ee166b70804e66aa300f0c',
+    chainId: '56',
+    uriFormat: '',
+    tokenIds: null,
+    type: 'ERC1155Token',
+    name: 'Super Rare Collection (MOSRC)',
+    isAccepted: true,
   },
 
   // 97 BSC Testnet
@@ -150,6 +171,7 @@ const COLLECTION_CONSTANT = [
     type: 'ERC721Token',
     tokenIds: { min: 1, max: 20 },
     name: 'Wanaka Land (WLAND)',
+    isAccepted: true,
   },
   {
     address: '0x85605b7f6bf89b1f66519da95bcc6fcf426c9e47',
@@ -158,6 +180,7 @@ const COLLECTION_CONSTANT = [
     type: 'ERC721Token',
     tokenIds: null,
     name: 'Block Creatures',
+    isAccepted: true,
   },
 ];
 

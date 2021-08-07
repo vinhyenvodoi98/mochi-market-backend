@@ -37,7 +37,7 @@ const ERC721NFTSchema = new Schema(
 );
 
 ERC721NFTSchema.index({ chainId: 1, collectionAddress: 1, tokenId: 1 }, { unique: true });
-ERC721NFTSchema.index({ name: 'text', description: 'text', attributes: 'text' });
+ERC721NFTSchema.index({ name: 'text', description: 'text', attributes: 'text', tokenId: 'text' });
 
 const ERC721NFT = mongoose.model('ERC721NFT', ERC721NFTSchema);
 
