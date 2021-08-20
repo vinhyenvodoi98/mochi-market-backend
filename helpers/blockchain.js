@@ -9,12 +9,12 @@ const getAcceptedNfts = async (chainId) => {
   const nftList = getNftListInstance(chainId);
 
   let acceptedNftsAddress = await nftList.getAcceptedNFTs();
-  let address = { erc721Addresses: [], erc1155Addresses: [] };
+  let address = { erc721Accepted: [], erc1155Accepted: [] };
   await Promise.all(
     acceptedNftsAddress.map(async (nftAddress) => {
       let isERC1155 = await nftList.isERC1155(nftAddress);
-      if (isERC1155) address.erc1155Addresses.push(nftAddress);
-      else address.erc721Addresses.push(nftAddress);
+      if (isERC1155) address.erc1155Accepted.push(nftAddress.toLowerCase());
+      else address.erc721Accepted.push(nftAddress.toLowerCase());
 
       return;
     })

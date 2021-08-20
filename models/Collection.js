@@ -36,6 +36,7 @@ const CollectionSchema = new Schema(
       enum: ['ERC721Token', 'ERC1155Token'],
     },
     isVerify: { type: Boolean, default: false },
+    isAccepted: { type: Boolean, default: false },
   },
   {
     timestamps: true,
