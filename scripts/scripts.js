@@ -5,6 +5,7 @@ const {
   InitERC1155NFTByCollectionAddress,
   UpdateERC721NFTByCollectionAddress,
   UpdateERC1155NFTByCollectionAddress,
+  UpdateERC721NFTByCollectionAddressAndTokenId
 } = require('./nft');
 const { FetchActiveSellOrder, UpdateSellOrderByChainId } = require('./sellOrder');
 
@@ -27,6 +28,8 @@ const main = async () => {
       await FetchActiveSellOrder(myArgs[1]);
     case 'updateSellOrder':
       await UpdateSellOrderByChainId(myArgs[1]);
+    case 'updateErc721NftById':
+      await UpdateERC721NFTByCollectionAddressAndTokenId(myArgs[1], myArgs[2], myArgs[3])
     // case 'allSellOrder':
     //   await fetchAllSellOrder(myArgs[1]);
     // case 'allNft':

@@ -157,24 +157,24 @@ router.get('/:chainId/:searchString', async (req, res) => {
           a.price > b.price
             ? 1
             : b.price > a.price
-            ? -1
-            : a.sellId < b.sellId
-            ? 1
-            : b.sellId < a.sellId
-            ? -1
-            : 0
+              ? -1
+              : a.sellId < b.sellId
+                ? 1
+                : b.sellId < a.sellId
+                  ? -1
+                  : 0
         );
       } else {
         sellOrders.sort((a, b) =>
           a.price < b.price
             ? 1
             : b.price < a.price
-            ? -1
-            : a.sellId < b.sellId
-            ? 1
-            : b.sellId < a.sellId
-            ? -1
-            : 0
+              ? -1
+              : a.sellId < b.sellId
+                ? 1
+                : b.sellId < a.sellId
+                  ? -1
+                  : 0
         );
       }
     } else {
@@ -500,7 +500,6 @@ router.get('/filterByAttributes/:chainId/:address', async (req, res) => {
             sellTime: sellOrder.sellTime,
             image: nftInfo.image,
             name: nftInfo.name,
-            description: nftInfo.description,
             tokenURI: nftInfo.tokenURI,
             thumb: nftInfo.thumb,
             attributes: nftInfo.attributes,
@@ -577,7 +576,6 @@ router.get('/filterByAttributes/:chainId/:address', async (req, res) => {
             sellTime: sellOrder.sellTime,
             image: nftInfo.image,
             name: nftInfo.name,
-            description: nftInfo.description,
             tokenURI: nftInfo.tokenURI,
             thumb: nftInfo.thumb,
             attributes: nftInfo.attributes,
@@ -691,7 +689,6 @@ router.get('/filterByAttributes/:chainId/:address/:searchString', async (req, re
             sellTime: sellOrder.sellTime,
             image: nftInfo.image,
             name: nftInfo.name,
-            description: nftInfo.description,
             tokenURI: nftInfo.tokenURI,
             thumb: nftInfo.thumb,
             attributes: nftInfo.attributes,
@@ -770,7 +767,6 @@ router.get('/filterByAttributes/:chainId/:address/:searchString', async (req, re
             sellTime: sellOrder.sellTime,
             image: nftInfo.image,
             name: nftInfo.name,
-            description: nftInfo.description,
             tokenURI: nftInfo.tokenURI,
             thumb: nftInfo.thumb,
             attributes: nftInfo.attributes,

@@ -77,6 +77,10 @@ async function main() {
     next();
   });
 
+  app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-cache');
+  })
+
   console.log('Run completed');
 }
 

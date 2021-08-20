@@ -174,6 +174,15 @@ const COLLECTION_CONSTANT = [
     isAccepted: true,
   },
   {
+    address: '0x3fcd7b77b172bd2103a2345de8e93290ce421578',
+    chainId: '97',
+    uriFormat: 'https://dev-files.wanakafarm.com/data/lands/{id}',
+    type: 'ERC721Token',
+    tokenIds: { min: 1, max: 20 },
+    name: 'Wanaka Land (WLAND)',
+    isAccepted: true,
+  },
+  {
     address: '0x85605b7f6bf89b1f66519da95bcc6fcf426c9e47',
     chainId: '97',
     uriFormat: '{tokenUri}.json',
