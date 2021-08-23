@@ -444,6 +444,33 @@ const UpdateERC721NFTByCollectionAddress = async (chainId, collectionAddress) =>
   }
 };
 
+
+const UpdateERC721NFTByCollectionAddressAndTokenId = async (chainId, collectionAddress, tokenId) => {
+  try {
+    collectionAddress = collectionAddress.toLowerCase();
+    let collectionInfo = await Collection.findOne({ address: collectionAddress, chainId: chainId });
+
+    if (!collectionInfo) throw Error('Invalid collection address');
+
+    if (collectionInfo.type !== 'ERC721Token') throw Error('Invalid collection type');
+
+    let items = await ERC721NFT.findOne({ chainId: chainId, collectionAddress: collectionAddress, tokenId: tokenId });
+    let instance = initERC721Single(chainId, collectionAddress);
+    if (items) {
+      await updateERC721NFT(chainId, instance, collectionInfo.uriFormat, tokenId);
+    } else {
+      await addERC721NFT(chainId, instance, collectionInfo.uriFormat, tokenId)
+    }
+
+
+    console.log('DONE');
+    process.exit(0);
+  } catch (err) {
+    console.log(err);
+    process.exit(1);
+  }
+};
+
 const UpdateERC1155NFTByCollectionAddress = async (chainId, collectionAddress) => {
   try {
     collectionAddress = collectionAddress.toLowerCase();
@@ -503,4 +530,5 @@ module.exports = {
   addERC1155NFT,
   updateERC721NFT,
   updateERC1155NFT,
+  UpdateERC721NFTByCollectionAddressAndTokenId
 };
