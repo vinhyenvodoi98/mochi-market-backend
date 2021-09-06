@@ -174,6 +174,9 @@ const checkCollectionInfo = async (chainId, instance) => {
   if (collectionConfig.name == null || collectionConfig.symbol == null) {
     name = await instance.name();
     symbol = await instance.symbol();
+  } else {
+    name = collectionConfig.name;
+    symbol = collectionConfig.symbol;
   }
 
   uriFormat = collectionConfig.uriFormat == null ? '' : collectionConfig.uriFormat;
@@ -199,8 +202,8 @@ const getCollectionConfig = (chainId, collectionAddress) => {
         chainId: chainId,
         address: COLLECTION_CONSTANT[i].address ? COLLECTION_CONSTANT[i].address : null,
         name: COLLECTION_CONSTANT[i].name ? COLLECTION_CONSTANT[i].name : null,
-        symbol: COLLECTION_CONSTANT[i].symbol ? COLLECTION_CONSTANT.symbol : null,
-        type: COLLECTION_CONSTANT[i].type ? COLLECTION_CONSTANT.type : null,
+        symbol: COLLECTION_CONSTANT[i].symbol ? COLLECTION_CONSTANT[i].symbol : null,
+        type: COLLECTION_CONSTANT[i].type ? COLLECTION_CONSTANT[i].type : null,
         tokenIds: COLLECTION_CONSTANT[i].tokenIds ? COLLECTION_CONSTANT[i].tokenIds : null,
         uriFormat: COLLECTION_CONSTANT[i].uriFormat ? COLLECTION_CONSTANT[i].uriFormat : null,
         isAccepted: COLLECTION_CONSTANT[i].isAccepted ? COLLECTION_CONSTANT[i].isAccepted : null,

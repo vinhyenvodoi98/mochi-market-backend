@@ -120,7 +120,7 @@ router.get('/:chainId/:searchString', async (req, res) => {
 
     let nfts = erc721Nfts.concat(erc1155Nfts);
 
-    if (nfts.length == 0) return res.json(result);
+    if (nfts.length == 0) return res.json([]);
 
     await Promise.all(
       nfts.map(async (nft) => {
@@ -157,24 +157,24 @@ router.get('/:chainId/:searchString', async (req, res) => {
           a.price > b.price
             ? 1
             : b.price > a.price
-              ? -1
-              : a.sellId < b.sellId
-                ? 1
-                : b.sellId < a.sellId
-                  ? -1
-                  : 0
+            ? -1
+            : a.sellId < b.sellId
+            ? 1
+            : b.sellId < a.sellId
+            ? -1
+            : 0
         );
       } else {
         sellOrders.sort((a, b) =>
           a.price < b.price
             ? 1
             : b.price < a.price
-              ? -1
-              : a.sellId < b.sellId
-                ? 1
-                : b.sellId < a.sellId
-                  ? -1
-                  : 0
+            ? -1
+            : a.sellId < b.sellId
+            ? 1
+            : b.sellId < a.sellId
+            ? -1
+            : 0
         );
       }
     } else {
@@ -1077,6 +1077,8 @@ router.get('/bySellId/:chainId/:sellId', async (req, res) => {
     let sellOrder = await SellOrder.findOne({ chainId: chainId, sellId: sellId });
     sellOrder = await checkSellOrder(chainId, sellId, sellOrder);
 
+    let otherSellOrders = await getOtherSellOrders(chainId, sellOrder);
+
     let nftInfo = await getNftInfo(chainId, sellOrder.collectionAddress, sellOrder.tokenId);
 
     let result = {
@@ -1098,9 +1100,9 @@ router.get('/bySellId/:chainId/:sellId', async (req, res) => {
       name: nftInfo.name,
       description: nftInfo.description,
       tokenURI: nftInfo.tokenURI,
-      attributes: nftInfo.attributes,
       thumb: nftInfo.thumb,
-      otherSellOrders: sellOrder.otherSellOrders,
+      attributes: nftInfo.attributes,
+      otherSellOrders: otherSellOrders,
     };
 
     return res.json(result);
@@ -1183,7 +1185,8 @@ router.get('/byNft/:chainId/:address/:tokenId', async (req, res) => {
 });
 
 const checkSellOrder = async (chainId, sellId, sellOrder) => {
-  if (!!sellOrder && sellOrder.amount != 0) return sellOrder;
+  if (!!sellOrder && sellOrder.amount != 0 && sellOrder.buyers.length == sellOrder.buyTimes.length)
+    return sellOrder;
 
   let instance = getSellOrderListInstance(chainId);
 
@@ -1203,17 +1206,6 @@ const checkSellOrder = async (chainId, sellId, sellOrder) => {
     { __v: 0, _id: 0, createdAt: 0, updatedAt: 0 }
   );
 
-  let otherSellOrders = await SellOrder.find(
-    {
-      chainId: chainId,
-      collectionAddress: sellOrder.collectionAddress,
-      tokenId: sellOrder.tokenId,
-      isActive: true,
-      sellId: { $nin: [sellOrder.sellId] },
-    },
-    { __v: 0, _id: 0, createdAt: 0, updatedAt: 0 }
-  ).sort({ sellId: -1 });
-
   return {
     chainId: sellOrder.chainId,
     sellId: sellOrder.sellId,
@@ -1228,8 +1220,22 @@ const checkSellOrder = async (chainId, sellId, sellOrder) => {
     sellTime: sellOrder.sellTime,
     buyers: sellOrder.buyers,
     buyTimes: sellOrder.buyTimes,
-    otherSellOrders: otherSellOrders,
   };
+};
+
+const getOtherSellOrders = async (chainId, sellOrderInfo) => {
+  let otherSellOrders = await SellOrder.find(
+    {
+      chainId: chainId,
+      collectionAddress: sellOrderInfo.collectionAddress,
+      tokenId: sellOrderInfo.tokenId,
+      isActive: true,
+      sellId: { $nin: [sellOrderInfo.sellId] },
+    },
+    { __v: 0, _id: 0, createdAt: 0, updatedAt: 0 }
+  ).sort({ sellId: -1 });
+
+  return otherSellOrders;
 };
 
 const getNftInfo = async (chainId, collectionAddress, tokenId) => {
@@ -1253,15 +1259,15 @@ const getNftInfo = async (chainId, collectionAddress, tokenId) => {
       collectionAddress,
       tokenId,
     });
-    if (!item.thumb) {
-      let instance = initERC721Single(chainId, collectionAddress);
-      await updateERC721NFT(chainId, instance, collection.uriFormat, tokenId);
+    // if (!item.thumb) {
+    //   let instance = initERC721Single(chainId, collectionAddress);
+    //   await updateERC721NFT(chainId, instance, collection.uriFormat, tokenId);
 
-      item = await ERC721NFT.findOne(
-        { chainId: chainId, collectionAddress: collectionAddress, tokenId: tokenId },
-        { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 }
-      );
-    }
+    //   item = await ERC721NFT.findOne(
+    //     { chainId: chainId, collectionAddress: collectionAddress, tokenId: tokenId },
+    //     { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 }
+    //   );
+    // }
   } else if (collection.type == 'ERC1155Token') {
     item = await ERC1155NFT.findOne({
       chainId,
@@ -1346,7 +1352,7 @@ const getFilter = (chainId, address, filter) => {
     return JSON.parse(queryString);
   } catch (err) {
     console.log(err);
-    return null;
+    throw err;
   }
 };
 

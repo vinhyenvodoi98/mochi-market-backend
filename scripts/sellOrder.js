@@ -77,18 +77,19 @@ const updateSellOrder = async (chainId, sellOrderInfo) => {
   try {
     let sellId = parseInt(sellOrderInfo.sellId);
 
-    let exist = await SellOrder.findOne({ chainId: chainId, sellId: sellId });
+    let sellOrder = await SellOrder.findOne({ chainId: chainId, sellId: sellId });
 
-    if (!exist) {
+    if (!sellOrder) {
       throw Error('Sell Order not exist');
     }
+
+    if (sellOrder.buyers.length > sellOrderInfo.buyers.length) return;
 
     let collectionAddress = sellOrderInfo.nftAddress.toLowerCase();
     let tokenId = sellOrderInfo.tokenId.toString();
 
     let mess = '[UPDATE SELL ORDER] chainId: ' + chainId + ', sellId: ' + sellId;
 
-    let sellOrder = await SellOrder.findOne({ chainId: chainId, sellId, sellId });
     let change = false;
     if (sellOrder.tokenId !== sellOrderInfo.tokenId.toString()) {
       sellOrder.tokenId = sellOrderInfo.tokenId.toString();
@@ -132,9 +133,13 @@ const updateSellOrder = async (chainId, sellOrderInfo) => {
     }
     if (sellOrder.buyers.length !== sellOrderInfo.buyers.length) {
       sellOrder.buyers = await sellOrderInfo.buyers.map((buyer) => buyer.toLowerCase());
+      change = !change ? true : change;
+      mess = mess + ', buyers';
+    }
+    if (sellOrder.buyTimes.length != sellOrderInfo.buyTimes.length) {
       sellOrder.buyTimes = await sellOrderInfo.buyTimes.map((buyTime) => parseInt(buyTime));
       change = !change ? true : change;
-      mess = mess + ', buyers, buyTimes';
+      mess = mess + ', buyTimes';
     }
 
     if (change) {
@@ -197,7 +202,7 @@ const deactiveSellOrder = async (chainId, sellId) => {
 const updatePrice = async (chainId, sellId, price) => {
   try {
     sellId = parseInt(sellId);
-    let sellOrder = await SellOrder.findOne({ chainId: chainId, sellId });
+    let sellOrder = await SellOrder.findOne({ chainId: chainId, sellId: sellId });
 
     if (!sellOrder) {
       throw Error('Sell Order not exist');
@@ -213,31 +218,93 @@ const updatePrice = async (chainId, sellId, price) => {
   }
 };
 
+const completeSellOrder = async (chainId, sellId, buyer, buyAmount) => {
+  try {
+    sellId = parseInt(sellId);
+    buyer = buyer.toLowerCase();
+    buyAmount = parseInt(buyAmount);
+
+    let sellOrder = await SellOrder.findOne({ chainId: chainId, sellId: sellId });
+    if (!sellOrder) {
+      throw Error('Sell Order ' + sellId + ' not exist');
+    }
+
+    console.log('[COMPLETE SELL ORDER] chainId: ' + chainId + ', sellId: ' + sellId);
+
+    let isActive, soldAmount;
+    if (parseInt(sellOrder.soldAmount) + parseInt(buyAmount) == parseInt(sellOrder.amount)) {
+      isActive = false;
+      soldAmount = parseInt(sellOrder.soldAmount) + parseInt(buyAmount);
+    }
+
+    sellOrder.buyers.push(buyer);
+    sellOrder.isActive = isActive;
+    sellOrder.soldAmount = sellOrder.soldAmount;
+
+    await sellOrder.save();
+  } catch (err) {
+    console.log(err);
+    return;
+  }
+};
+
 const FetchActiveSellOrder = async (chainId) => {
   try {
     const sellOrderList = getSellOrderListInstance(chainId);
 
     let availableSellOrderIdList = await sellOrderList.getAvailableSellOrdersIdList();
-    let availableSellOrders721 = await sellOrderList.getSellOrdersByIdList(
-      availableSellOrderIdList.resultERC721
-    );
-    let availableSellOrders1155 = await sellOrderList.getSellOrdersByIdList(
-      availableSellOrderIdList.resultERC1155
-    );
 
-    let availableSellOrders = availableSellOrders721.concat(availableSellOrders1155);
+    for (let i = 0; i < availableSellOrderIdList.resultERC721.length; i += 200) {
+      let listIds;
+      if (i + 200 <= availableSellOrderIdList.resultERC721.length - 1) {
+        listIds = availableSellOrderIdList.resultERC721.slice(i, i + 200);
+      } else {
+        listIds = availableSellOrderIdList.resultERC721.slice(
+          i,
+          availableSellOrderIdList.resultERC721.length
+        );
+      }
 
-    await Promise.all(
-      availableSellOrders.map(async (sellOrder) => {
-        let item = await SellOrder.findOne({
-          chainId: chainId,
-          sellId: parseInt(sellOrder.sellId),
-        });
-        if (!item) {
-          await addSellOrder(chainId, sellOrder);
-        }
-      })
-    );
+      let sellOrdersInfo = await sellOrderList.getSellOrdersByIdList(listIds);
+
+      await Promise.all(
+        sellOrdersInfo.map(async (sellOrder) => {
+          let item = await SellOrder.findOne({
+            chainId: chainId,
+            sellId: parseInt(sellOrder.sellId),
+          });
+          if (!item) {
+            await addSellOrder(chainId, sellOrder);
+          }
+        })
+      );
+    }
+
+    for (let i = 0; i < availableSellOrderIdList.resultERC1155.length; i += 200) {
+      let listIds;
+      if (i + 200 <= availableSellOrderIdList.resultERC1155.length - 1) {
+        listIds = availableSellOrderIdList.resultERC1155.slice(i, i + 200);
+      } else {
+        listIds = availableSellOrderIdList.resultERC1155.slice(
+          i,
+          availableSellOrderIdList.resultERC1155.length
+        );
+      }
+
+      let sellOrdersInfo = await sellOrderList.getSellOrdersByIdList(listIds);
+
+      await Promise.all(
+        sellOrdersInfo.map(async (sellOrder) => {
+          let item = await SellOrder.findOne({
+            chainId: chainId,
+            sellId: parseInt(sellOrder.sellId),
+          });
+          if (!item) {
+            await addSellOrder(chainId, sellOrder);
+          }
+        })
+      );
+    }
 
     console.log('DONE');
     process.exit(0);
@@ -257,7 +324,13 @@ const UpdateSellOrderByChainId = async (chainId) => {
 
     const sellOrderList = getSellOrderListInstance(chainId);
 
-    let sellIds = sellOrders.map((sellOrder) => sellOrder.sellId);
+    let sellIds = [];
+
+    await sellOrders.map((sellOrder) => {
+      if (sellOrder.isActive == true) {
+        sellIds.push(sellOrder.sellId);
+      }
+    });
 
     for (let i = 0; i < sellIds.length; i += 200) {
       let listIds;
@@ -291,4 +364,5 @@ module.exports = {
   updateSellOrder,
   updatePrice,
   addSellOrder,
+  completeSellOrder,
 };

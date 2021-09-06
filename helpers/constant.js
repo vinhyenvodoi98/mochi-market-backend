@@ -162,6 +162,46 @@ const COLLECTION_CONSTANT = [
     name: 'Super Rare Collection (MOSRC)',
     isAccepted: true,
   },
+  {
+    address: '0x0cb3eedae5e0eb6a3bae7bade59da1671019bb6e',
+    chainId: '56',
+    uriFormat: 'https://api.dragonwarrior.io/json/warrior/meta/{id}',
+    tokenIds: {
+      min: 1,
+      max: 18000,
+    },
+    type: 'ERC721Token',
+    name: 'DragonWarrior (WARRIOR)',
+    isAccepted: true,
+  },
+  {
+    address: '0x821304cb22ed418eee60d55100749ade15c2d0eb',
+    chainId: '56',
+    uriFormat: 'https://api.dragonwarrior.io/json/dragon/meta/{id}',
+    tokenIds: null,
+    type: 'ERC721Token',
+    name: 'Dragon (Dragon)',
+    isAccepted: true,
+  },
+  {
+    address: '0x7a339dbd8881dd8435a2ba0c537d7eccd905710b',
+    chainId: '56',
+    uriFormat: 'https://api.dragonwarrior.io/json/warrior-card/meta/{id}',
+    tokenIds: null,
+    type: 'ERC721Token',
+    name: 'Lucky Card (LCard)',
+    isAccepted: true,
+  },
+  {
+    address: '0x1ddcd5b73afb734b4ae6b1c139858f36311ed4d3',
+    chainId: '56',
+    name: 'ECIONFT',
+    symbol: 'ECIONFT',
+    uriFormat: ' https://metadata.ecio.space/api/token/{id}',
+    tokenIds: null,
+    type: 'ERC1155Token',
+    isAccepted: false,
+  },
 
   // 97 BSC Testnet
   {

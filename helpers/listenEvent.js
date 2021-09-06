@@ -7,8 +7,8 @@ const Collection = require('../models/Collection');
 const {
   addSellOrder,
   deactiveSellOrder,
-  updateSellOrder,
   updatePrice,
+  completeSellOrder,
 } = require('../scripts/sellOrder');
 
 const EventStream = async (chainId) => {
@@ -81,8 +81,7 @@ const EventStream = async (chainId) => {
     (sellId, seller, buyer, nftAddress, tokenId, price, amount, token) => {
       const buy = async () => {
         try {
-          let sellOrderInfo = await sellOrderInstance.getSellOrderById(sellId);
-          await updateSellOrder(chainId, sellOrderInfo);
+          await completeSellOrder(chainId, sellId, buyer, amount);
         } catch (err) {
           console.log({ err });
         }

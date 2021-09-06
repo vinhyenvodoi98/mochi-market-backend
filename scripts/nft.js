@@ -55,34 +55,62 @@ const addERC721NFT = async (chainId, instance, uriFormat, tokenId) => {
     let req = await axios.get(tokenURI);
 
     let thumb = 'none';
+    if (
+      collectionAddress != '0x7a339dbd8881dd8435a2ba0c537d7eccd905710b' &&
+      collectionAddress != '0x821304cb22ed418eee60d55100749ade15c2d0eb' &&
+      collectionAddress != '0x0cb3eedae5e0eb6a3bae7bade59da1671019bb6e'
+    ) {
+      let info = await axios.get(
+        `https://api.covalenthq.com/v1/${chainId}/tokens/${collectionAddress}/nft_metadata/${tokenId}/?key=${process.env.COVALENT_KEY}`
+      );
 
-    let info = await axios.get(
-      `https://api.covalenthq.com/v1/${chainId}/tokens/${collectionAddress}/nft_metadata/${tokenId}/?key=${process.env.COVALENT_KEY}`
-    );
-
-    for (let i = 0; i < info.data.data.items.length; i++) {
-      if (collectionAddress == info.data.data.items[i].contract_address.toLowerCase())
-        if (info.data.data.items[i].nft_data !== null)
-          for (let j = 0; j < info.data.data.items[i].nft_data.length; j++) {
-            if (info.data.data.items[i].nft_data[j].token_id == tokenId) {
-              thumb = info.data.data.items[i].nft_data[j].external_data.image_256;
+      for (let i = 0; i < info.data.data.items.length; i++) {
+        if (collectionAddress == info.data.data.items[i].contract_address.toLowerCase())
+          if (info.data.data.items[i].nft_data !== null)
+            for (let j = 0; j < info.data.data.items[i].nft_data.length; j++) {
+              if (info.data.data.items[i].nft_data[j].token_id == tokenId) {
+                thumb = info.data.data.items[i].nft_data[j].external_data.image_256;
+              }
             }
-          }
+      }
     }
 
-    let newNFT = new ERC721NFT({
-      chainId: chainId,
-      tokenId: tokenId,
-      tokenURI: tokenURI,
-      name: !!req.data.name ? req.data.name : 'Unnamed',
-      image: !!req.data.image ? req.data.image : !!req.data.imageUrl ? req.data.imageUrl : '',
-      description: !!req.data.description ? req.data.description : '',
-      attributes: !!req.data.attributes ? req.data.attributes : [],
-      collectionAddress: collectionAddress,
-      thumb: thumb,
-    });
+    if (
+      collectionAddress == '0x7a339dbd8881dd8435a2ba0c537d7eccd905710b' ||
+      collectionAddress == '0x821304cb22ed418eee60d55100749ade15c2d0eb' ||
+      collectionAddress == '0x0cb3eedae5e0eb6a3bae7bade59da1671019bb6e'
+    ) {
+      let newNFT = new ERC721NFT({
+        chainId: chainId,
+        tokenId: tokenId,
+        tokenURI: tokenURI,
+        name: !!req.data.data.name ? req.data.data.name : 'Unnamed',
+        image: !!req.data.data.image
+          ? req.data.data.image
+          : !!req.data.data.imageUrl
+          ? req.data.data.imageUrl
+          : '',
+        description: !!req.data.data.description ? req.data.data.description : '',
+        attributes: !!req.data.data.attributes ? req.data.data.attributes : [],
+        collectionAddress: collectionAddress,
+        thumb: thumb,
+      });
+      await newNFT.save();
+    } else {
+      let newNFT = new ERC721NFT({
+        chainId: chainId,
+        tokenId: tokenId,
+        tokenURI: tokenURI,
+        name: !!req.data.name ? req.data.name : 'Unnamed',
+        image: !!req.data.image ? req.data.image : !!req.data.imageUrl ? req.data.imageUrl : '',
+        description: !!req.data.description ? req.data.description : '',
+        attributes: !!req.data.attributes ? req.data.attributes : [],
+        collectionAddress: collectionAddress,
+        thumb: thumb,
+      });
 
-    await newNFT.save();
+      await newNFT.save();
+    }
     return;
   } catch (err) {
     console.log(err);
@@ -196,19 +224,24 @@ const updateERC721NFT = async (chainId, instance, uriFormat, tokenId) => {
     let req = await axios.get(tokenURI);
 
     let thumb = 'none';
+    if (
+      collectionAddress != '0x7a339dbd8881dd8435a2ba0c537d7eccd905710b' &&
+      collectionAddress != '0x821304cb22ed418eee60d55100749ade15c2d0eb' &&
+      collectionAddress != '0x0cb3eedae5e0eb6a3bae7bade59da1671019bb6e'
+    ) {
+      let info = await axios.get(
+        `https://api.covalenthq.com/v1/${chainId}/tokens/${collectionAddress}/nft_metadata/${tokenId}/?key=${process.env.COVALENT_KEY}`
+      );
 
-    let info = await axios.get(
-      `https://api.covalenthq.com/v1/${chainId}/tokens/${collectionAddress}/nft_metadata/${tokenId}/?key=${process.env.COVALENT_KEY}`
-    );
-
-    for (let i = 0; i < info.data.data.items.length; i++) {
-      if (collectionAddress == info.data.data.items[i].contract_address.toLowerCase())
-        if (info.data.data.items[i].nft_data !== null)
-          for (let j = 0; j < info.data.data.items[i].nft_data.length; j++) {
-            if (info.data.data.items[i].nft_data[j].token_id == tokenId) {
-              thumb = info.data.data.items[i].nft_data[j].external_data.image_256;
+      for (let i = 0; i < info.data.data.items.length; i++) {
+        if (collectionAddress == info.data.data.items[i].contract_address.toLowerCase())
+          if (info.data.data.items[i].nft_data !== null)
+            for (let j = 0; j < info.data.data.items[i].nft_data.length; j++) {
+              if (info.data.data.items[i].nft_data[j].token_id == tokenId) {
+                thumb = info.data.data.items[i].nft_data[j].external_data.image_256;
+              }
             }
-          }
+      }
     }
 
     let item = await ERC721NFT.findOne({
@@ -217,14 +250,33 @@ const updateERC721NFT = async (chainId, instance, uriFormat, tokenId) => {
       tokenId: tokenId,
     });
 
-    item.tokenURI = tokenURI;
-    item.name = !!req.data.name ? req.data.name : 'Unnamed';
-    item.image = !!req.data.image ? req.data.image : !!req.data.imageUrl ? req.data.imageUrl : '';
-    item.description = !!req.data.description ? req.data.description : '';
-    item.attributes = !!req.data.attributes ? req.data.attributes : [];
-    item.thumb = thumb;
+    if (
+      collectionAddress == '0x7a339dbd8881dd8435a2ba0c537d7eccd905710b' ||
+      collectionAddress == '0x821304cb22ed418eee60d55100749ade15c2d0eb' ||
+      collectionAddress == '0x0cb3eedae5e0eb6a3bae7bade59da1671019bb6e'
+    ) {
+      item.tokenURI = tokenURI;
+      item.name = !!req.data.data.name ? req.data.data.name : 'Unnamed';
+      item.image = !!req.data.data.image
+        ? req.data.data.image
+        : !!req.data.data.imageUrl
+        ? req.data.data.imageUrl
+        : '';
+      item.description = !!req.data.data.description ? req.data.data.description : '';
+      item.attributes = !!req.data.data.attributes ? req.data.data.attributes : [];
+      item.thumb = thumb;
 
-    await item.save();
+      await item.save();
+    } else {
+      item.tokenURI = tokenURI;
+      item.name = !!req.data.name ? req.data.name : 'Unnamed';
+      item.image = !!req.data.image ? req.data.image : !!req.data.imageUrl ? req.data.imageUrl : '';
+      item.description = !!req.data.description ? req.data.description : '';
+      item.attributes = !!req.data.attributes ? req.data.attributes : [];
+      item.thumb = thumb;
+
+      await item.save();
+    }
   } catch (err) {
     console.log(err);
     process.exit(1);
@@ -444,8 +496,11 @@ const UpdateERC721NFTByCollectionAddress = async (chainId, collectionAddress) =>
   }
 };
 
-
-const UpdateERC721NFTByCollectionAddressAndTokenId = async (chainId, collectionAddress, tokenId) => {
+const UpdateERC721NFTByCollectionAddressAndTokenId = async (
+  chainId,
+  collectionAddress,
+  tokenId
+) => {
   try {
     collectionAddress = collectionAddress.toLowerCase();
     let collectionInfo = await Collection.findOne({ address: collectionAddress, chainId: chainId });
@@ -454,14 +509,17 @@ const UpdateERC721NFTByCollectionAddressAndTokenId = async (chainId, collectionA
 
     if (collectionInfo.type !== 'ERC721Token') throw Error('Invalid collection type');
 
-    let items = await ERC721NFT.findOne({ chainId: chainId, collectionAddress: collectionAddress, tokenId: tokenId });
+    let items = await ERC721NFT.findOne({
+      chainId: chainId,
+      collectionAddress: collectionAddress,
+      tokenId: tokenId,
+    });
     let instance = initERC721Single(chainId, collectionAddress);
     if (items) {
       await updateERC721NFT(chainId, instance, collectionInfo.uriFormat, tokenId);
     } else {
-      await addERC721NFT(chainId, instance, collectionInfo.uriFormat, tokenId)
+      await addERC721NFT(chainId, instance, collectionInfo.uriFormat, tokenId);
     }
-
 
     console.log('DONE');
     process.exit(0);
@@ -530,5 +588,5 @@ module.exports = {
   addERC1155NFT,
   updateERC721NFT,
   updateERC1155NFT,
-  UpdateERC721NFTByCollectionAddressAndTokenId
+  UpdateERC721NFTByCollectionAddressAndTokenId,
 };
