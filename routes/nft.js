@@ -98,6 +98,26 @@ router.get('/:chainId/:address/:tokenId', async (req, res) => {
   }
 });
 
+router.post('/updateNft', async (req, res) => {
+  try {
+    var { chainId, address, tokenId } = req.body;
+    address = address.toLowerCase();
+
+    if (!isAddress(address)) {
+      return res.status(400).json({ msg: 'Address is not valid' });
+    }
+    if (!validChainId(chainId)) {
+      return res.status(400).json({ msg: 'ChainId is not valid' });
+    }
+
+    let nft = await checkUpdateNft(chainId, address, tokenId);
+    return res.json(nft);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).end();
+  }
+});
+
 const checkNft = async (chainId, address, tokenId) => {
   address = address.toLowerCase();
 
@@ -167,5 +187,90 @@ const checkNft = async (chainId, address, tokenId) => {
     attributes: nft.attributes,
   };
 };
+
+const checkUpdateNft = async (chainId, address, tokenId) => {
+  address = address.toLowerCase();
+
+  let collection = await Collection.findOne({ address: address, chainId: chainId });
+  if (!collection) {
+    return null;
+  }
+
+  let nft;
+
+  if (collection.type === 'ERC721Token') {
+    nft = await ERC721NFT.findOne(
+      { chainId: chainId, collectionAddress: address, tokenId: tokenId },
+      { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 }
+    );
+
+    if (nft) {
+      if (!nft.image) {
+        let instance = initERC721Single(chainId, address);
+        await updateERC721NFT(chainId, instance, collection.uriFormat, tokenId);
+
+        nft = await ERC721NFT.findOne(
+          { chainId: chainId, collectionAddress: address, tokenId: tokenId },
+          { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 }
+        );
+      }
+
+      return {
+        collectionName: collection.name,
+        collectionAddress: nft.collectionAddress,
+        chainId: nft.chainId,
+        tokenId: nft.tokenId,
+        name: nft.name,
+        image: nft.image,
+        description: nft.description,
+        thumb: nft.thumb,
+        tokenURI: nft.tokenURI,
+        attributes: nft.attributes,
+      };
+    }
+  } else if (collection.type === 'ERC1155Token') {
+    nft = await ERC1155NFT.findOne(
+      { chainId: chainId, collectionAddress: address, tokenId: tokenId },
+      { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 }
+    );
+
+    if (nft) {
+      if (!nft.image) {
+        let instance = initERC1155Single(chainId, address);
+        await updateERC1155NFT(chainId, instance, collection.uriFormat, tokenId);
+        nft = await ERC1155NFT.findOne(
+          { chainId: chainId, collectionAddress: address, tokenId: tokenId },
+          { _id: 0, createdAt: 0, updatedAt: 0, __v: 0 }
+        );
+      }
+
+      return {
+        collectionName: collection.name,
+        collectionAddress: nft.collectionAddress,
+        chainId: nft.chainId,
+        tokenId: nft.tokenId,
+        name: nft.name,
+        image: nft.image,
+        description: nft.description,
+        thumb: nft.thumb,
+        tokenURI: nft.tokenURI,
+        attributes: nft.attributes,
+      };
+    }
+  }
+
+  return {
+    collectionName: null,
+    collectionAddress: address,
+    chainId: chainId,
+    tokenId: tokenId,
+    name: null,
+    image: null,
+    description: null,
+    thumb: null,
+    tokenURI: null,
+    attributes: [],
+  };
+}
 
 module.exports = router;

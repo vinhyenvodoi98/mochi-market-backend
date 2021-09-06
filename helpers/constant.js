@@ -197,7 +197,7 @@ const NETWORK_CONSTANT = [
   { name: 'bsc', rpc: 'https://bsc-dataseed.binance.org/', chainId: '56', newestBlock: 56785758 },
   {
     name: 'polygon',
-    rpc: 'https://matic-mainnet.chainstacklabs.com/',
+    rpc: 'https://rpc-mainnet.matic.network',
     chainId: '137',
     newestBlock: 56785758,
   },
