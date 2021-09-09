@@ -1,13 +1,17 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const NFTSchema = new Schema(
+const CollectionSchema = new Schema(
   {
     address: {
       type: String,
       trim: true,
       required: true,
       match: [/^0x[a-fA-F0-9]{40}$/, 'address is invalid'],
+    },
+    chainId: {
+      type: String,
+      required: true,
     },
     name: {
       type: String,
@@ -23,20 +27,24 @@ const NFTSchema = new Schema(
       type: String,
       trim: true,
     },
-    tags: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
-    tokens: [{ type: Schema.Types.ObjectId, refPath: 'onModel' }],
-    onModel: {
+    uriFormat: {
+      type: String,
+    },
+    type: {
       type: String,
       required: true,
       enum: ['ERC721Token', 'ERC1155Token'],
     },
     isVerify: { type: Boolean, default: false },
+    isAccepted: { type: Boolean, default: false },
   },
   {
     timestamps: true,
   }
 );
 
-const NFT = mongoose.model('NFT', NFTSchema);
+CollectionSchema.index({ chainId: 1, address: 1 }, { unique: true });
 
-module.exports = NFT;
+const Collection = mongoose.model('Collection', CollectionSchema);
+
+module.exports = Collection;

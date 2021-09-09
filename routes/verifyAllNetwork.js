@@ -1,10 +1,16 @@
 const express = require('express');
 const VerifyAllNetwork = require('../models/VerifyAllNetwork');
 const router = express.Router();
+const { isAddress } = require('../helpers/verifyAddress');
 
 router.post('/', async (req, res) => {
   var { address, network } = req.body;
   address = address.toLowerCase();
+
+  if (!isAddress(address)) {
+    return res.status(400).json({ msg: 'Address is not valid' });
+  }
+
   try {
     let verifyAllNetwork = new VerifyAllNetwork({
       address,
@@ -38,6 +44,11 @@ router.get('/', async (req, res) => {
 router.delete('/:address', async (req, res) => {
   var { address } = req.params;
   address = address.toLowerCase();
+
+  if (!isAddress(address)) {
+    return res.status(400).json({ msg: 'Address is not valid' });
+  }
+
   try {
     verifiedAddress = await VerifyAllNetwork.deleteOne({ address });
     if (verifiedAddress.n !== 0) return res.json({ isSuccess: true });

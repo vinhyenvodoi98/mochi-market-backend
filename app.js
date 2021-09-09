@@ -8,18 +8,19 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const { EventStream, OldEventStream } = require('./helpers/listenEvent');
 
 const app = express();
 
 require('dotenv').config();
 
 async function main() {
+  const collectionRouter = require('./routes/collection');
   const nftRouter = require('./routes/nft');
   const userRouter = require('./routes/user');
   const verifyRouter = require('./routes/verify');
   const sellOrderRouter = require('./routes/sellOrder');
   const verifyAllNetworkRouter = require('./routes/verifyAllNetwork');
+  const statusRouter = require('./routes/status');
 
   mongoose.connect(
     process.env.MONGODB_URI,
@@ -31,7 +32,8 @@ async function main() {
 
   mongoose.set('useCreateIndex', true);
 
-  let whitelist = [process.env.ORIGIN_CORS];
+  const orginCors = process.env.ORIGIN_CORS;
+  let whitelist = orginCors.split(',');
   let corsOptions = {
     origin: function (origin, callback) {
       if (whitelist.indexOf(origin) !== -1) {
@@ -42,11 +44,7 @@ async function main() {
     },
   };
 
-  // new event around 5k block so we need create event listen of old collection
-  OldEventStream();
-  EventStream();
-
-  // app.use(cors());
+  app.use(cors());
   app.use(helmet());
   app.use(bodyParser.json());
   app.use(express.urlencoded({ extended: true }));
@@ -54,11 +52,12 @@ async function main() {
 
   app.use(express.static(path.join(__dirname, 'public')));
 
-  app.use('/nft', cors(corsOptions), nftRouter);
-  app.use('/user', cors(corsOptions), userRouter);
-  app.use('/sellOrder', cors(corsOptions), sellOrderRouter);
-  app.use('/verify', cors(corsOptions), verifyRouter);
-  app.use('/verifyAllNetwork', cors(corsOptions), verifyAllNetworkRouter);
+  app.use('/collection', /**cors(corsOptions),**/ collectionRouter);
+  app.use('/nft', /**cors(corsOptions),**/ nftRouter);
+  app.use('/user', /**cors(corsOptions),**/ userRouter);
+  app.use('/sellOrder', /**cors(corsOptions),**/ sellOrderRouter);
+  app.use('/verify', /**cors(corsOptions),**/ verifyRouter);
+  app.use('/verifyAllNetwork', /**cors(corsOptions),**/ verifyAllNetworkRouter);
 
   // catch 404 and forward to error handler
   app.use((req, res, next) => {
@@ -77,6 +76,10 @@ async function main() {
     res.send({ err });
     next();
   });
+
+  app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-cache');
+  })
 
   console.log('Run completed');
 }
